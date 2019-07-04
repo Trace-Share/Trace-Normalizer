@@ -13,6 +13,7 @@ import TMLib.subscribers.normalizers
 import sys
 
 import argparse
+from pathlib import Path
 
 #######
 ###  Normalizer funcs
@@ -317,7 +318,19 @@ def normalize(config_path, pcap, res_path):
     rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt)    
 
 if __name__ == '__main__':
-    #print(generate_config(r'D:\Untitled-1.yaml'))
-    normalize(config_path = sys.argv[1], pcap=sys.argv[2], res_path=sys.argv[3])
+    # print(generate_config(r'D:\Untitled-1.yaml'))
+    # normalize(config_path = sys.argv[1], pcap=sys.argv[2], res_path=sys.argv[3])
+
+    description = "TODO"
+
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('-c', '--configuration', help='Path to a Json or Yaml configuration file.'
+    , type=Path, required=True)
+    parser.add_argument('-p', '--pcap', help='Path to a PCAP file.', type=Path, required=True)
+    parser.add_argument('-o', '--output', help='Path to output PCAP file (creates or overwrites).'
+    , type=Path, required=True)
+
+    args = parser.parse_args()
+    normalize(args.configuration, args.pcap, args.output)
 
 
