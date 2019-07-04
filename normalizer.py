@@ -266,7 +266,12 @@ def generate_config(cfg_path):
     #                 }
     #             }
     #         ) 
-    return {'ip.map' : _map}
+
+    rev = {}
+    for key, val in _cfg.items():
+        for adr in val:
+            rev[adr] = key
+    return {'ip.map' : _map, 'ip.norm' : rev}
 
 
     

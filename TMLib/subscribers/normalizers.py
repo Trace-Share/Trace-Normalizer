@@ -103,6 +103,11 @@ def ipv4_mac_remmap(field_map):
                         data[TMdef.GLOBAL].to_mac_map(val, new_mac)
     return f
 
+def ip_norm_map_cpy(data, config):
+    r = cfg.get('ip.norm')
+    if r is not None:
+        data[TMdef.GLOBAL]['ip_norm_map'] = r
+
 """
 Single entry in subsribed_functions represents single tranformation.
 Multiple processing, preprocessing & validation functions may be referenced
@@ -142,6 +147,7 @@ subsribed_functions = { # dictionary of known transformation functions
     ]
     , FILL : [
         Filler.make_mac_map
+        , lambda _data, _config : _data[TMdef.GLOBAL].update({'mac_remmap' : {}} )
     ]
 }
 
@@ -183,6 +189,7 @@ subsribed_functions = { # dictionary of known transformation functions
     ]
     , FILL : [
         Filler.make_ip_map
+        ,ip_norm_map_cpy
     ]
 }
 
@@ -204,6 +211,7 @@ subsribed_functions = { # dictionary of known transformation functions
     ]
     , FILL : [
         Filler.make_ip_map
+        , ip_norm_map_cpy
     ]
 }
 
