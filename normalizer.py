@@ -8,7 +8,11 @@ import TMLib.Definitions as TMdef
 
 import TMLib.SubMng as TMm
 
+import subscribers.normalizers
+
 import sys
+
+import argparse
 
 #######
 ###  Normalizer funcs
@@ -308,5 +312,7 @@ def normalize(config_path, pcap, res_path):
     rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt)    
 
 if __name__ == '__main__':
-    print(generate_config(r'D:\Untitled-1.yaml'))
-    #normalize(config_path = sys.argv[1], pcap=sys.argv[2], res_path=sys.argv[3])
+    #print(generate_config(r'D:\Untitled-1.yaml'))
+    normalize(config_path = sys.argv[1], pcap=sys.argv[2], res_path=sys.argv[3])
+
+
