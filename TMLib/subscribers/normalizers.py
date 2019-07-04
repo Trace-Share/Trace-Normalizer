@@ -31,6 +31,11 @@ def timestamp_static_shift(packet, data, prev_timestamp_old, prev_timestamp_new,
     :return: new timestamp of the packet, float 
     """
     return curr_timestamp_old + data[TMdef.GLOBAL][TMdef.ATTACK]['timestamp_shift']
+def to_hex(i):
+    a = hex(i).replace('0x', '')
+    if len(a) == 1:
+        a = '0'+a
+    return a
 
 class MacSpace(object):
     def __init__(self, _from, _to, preserve_prefix=True):
@@ -44,10 +49,10 @@ class MacSpace(object):
 
     def get_next(self, addr):
         if self.prefix:
-            r = [int(i,16) for i in addr.split(':')[0:4]] + self.rng
+            r = [int(i,16) for i in addr.split(':')[0:3]] + self.rng
         else:
             r = self.rng
-        r = [hex(i).replace('0x', '') for i in r].join(':')
+        r = ':'.join([to_hex(i).replace('0x', '') for i in r])
         c = 1
         adr_len = 6
         if self.prefix:
