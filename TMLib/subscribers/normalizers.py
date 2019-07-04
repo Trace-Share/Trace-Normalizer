@@ -78,7 +78,11 @@ def mac_dict_atruntime_withprefix(fields):
             v = packet.getfieldval(field)
             mac_new = TMpp.globalRWdict_findMatch(data, 'mac_address_map', v)
             if mac_new is None and not is_ignored(v):
-                data[TMdef.PACKET]['mac_remmap'][field] = v
+                rm = data[TMdef.PACKET].get('mac_remmap')
+                if rm is None:
+                    rm = {}
+                    data[TMdef.PACKET] = rm
+                rm[field] = v
     return f
 
 def ipv4_mac_remmap(field_map):
