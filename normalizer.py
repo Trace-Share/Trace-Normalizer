@@ -1,12 +1,18 @@
 import scapy.all as scapy
 
 import TMLib.ReWrapper as ReWrapper
-import TMLib.Utility as MUtil
+import TMLib.utils.utils as MUtil
 import TMLib.TMdict as TMdict
 
 import TMLib.Definitions as TMdef
 
-import TMLib.TMmanager as TMm
+import TMLib.SubMng as TMm
+
+import sys
+
+#######
+###  Normalizer funcs
+########
 
 def parse_config(config_path):
     """
@@ -20,7 +26,7 @@ def parse_config(config_path):
         param_dict = MUtil.parse_yaml_args(config_path)
     return param_dict
 
-def build_rewrapper(attack, param_dict):
+def build_rewrapper(param_dict):
     """
     Fill dictinaries with data from config.
 
@@ -34,7 +40,7 @@ def build_rewrapper(attack, param_dict):
     packet_dict = TMdict.PacketDataRWdict()
     conversation_dict = TMdict.ConversationRWdict()
     ## dicts stored in a dict under param data_dict under keys from TMdef
-    rewrap = ReWrapper.ReWrapper({}, global_dict, conversation_dict, packet_dict)
+    rewrap = ReWrapper.ReWrapper({}, global_dict, conversation_dict, packet_dict, scapy.NoPayload)
 
     return rewrap
 
@@ -101,6 +107,7 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
     :param rewrap: Rewrapper
     """
     ## check for readwrite mode
+    readwrite=None
     rw = param_dict.get('read.write')
     if rw:
         readwrite = rw
@@ -111,7 +118,7 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
     pkt_num=0
     if readwrite == 'bulk':
         ## read all packets
-        packets = scapy.utils.rdpcap(pcap)
+        packets = scapy.rdpcap(pcap)
         res_packets = []
 
         ## timestamp shift based on first packet and input param
@@ -122,7 +129,7 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
             rewrap.digest(packet)
             res_packets.append(packet)
 
-        pkt_num = len(attack.packets)
+        pkt_num = len(res_packets)
         scapy.wrpcap(res_path, res_packets)
 
     ## read & write packet by packet
@@ -133,7 +140,7 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
         ## temporary list, avoid recreating lists for writing
         tmp_l = [0]
 
-        attack.pkt_num = 0
+        pkt_num = 0
 
         packet = packets.read_packet() # read next packet
 
@@ -141,28 +148,134 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
         while (packet): # empty packet == None
             tmp_l[0] = packet # store current packet for writing 
 
-            if attack.pkt_num == 0: # first packet
+            if pkt_num == 0: # first packet
                 rewrap.set_timestamp_shift(timestamp_next_pkt - packet.time)
                 rewrap.digest(packet)
                 ## Create new pcap
                 scapy.wrpcap(res_path, packet)
             else:
                 rewrap.digest(packet)
-                attack.attack_end_utime = packet.time
                 ## Apend to existing pcap
                 scapy.wrpcap(res_path, packet, append=True)
 
             pkt_num += 1
             packet = packets.read_packet() # read next packet
 
+####
+## Config gen
+####
+
+class IPv4Space(object):
+    def __init__(self, block, _from, _to):
+        self.to = _to
+
+        self.rng = [block, _from, 0 ,0 ]
+
+    def get_next(self):
+        r = '{}.{}.{}.{}'.format(
+            str(self.rng[0])
+            , str(self.rng[1])
+            , str(self.rng[2])
+            , str(self.rng[3])
+            )
+        c = 1
+        for i in range(3, 0,-1):
+            self.rng[i], c = _carry(self.rng[i], c, 256)
+        if self.rng[1] > self.to:
+            raise ValueError('IP range exceeded')
+        return r 
+                   
+class MacSpace(object):
+    def __init__(self, block, _from, _to, preserve_prefix=True):
+        self.prefix=preserve_prefix
+        self.to = _to
+
+        if self.prefix:
+            self.rng = [_from, 0 ,0]
+        else:
+            self.rng = [_from, 0, 0, 0, 0, 0]
+
+    def get_next(self, addr):
+        if self.prefix:
+            r = addr[0:4] + self.rng
+        else:
+            r = self.rng
+        r = [str(i) for i in r].join('.')
+        c = 1
+        adr_len = 6
+        if self.prefix:
+            adr_len = 3
+        for i in range(adr_len-1, 0,-1):
+            self.rng[i], c = _carry(self.rng[i], c, 256)
+        if self.rng[1] > self.to:
+            raise ValueError('MAC range exceeded')
+        return r 
+
+
+def _carry(a, b, m):
+    a += b
+    return a%m, a==m
+
+def generate_config(cfg_path):
+    """
+    Generate rewrapper config based on IP map.
+
+    Limited to a single B block 240.0.0.0
+
+    ip map = {
+        source : []
+        , intermediate : []
+        , destination : []
+    }
+    """
+    _cfg = parse_config(cfg_path)
+    _blocks = [(255*i)//len(_cfg.keys()) for i in range(1, len(_cfg.keys())+1, 1) ]
+    ips = {
+        'source' : IPv4Space(240, 0, _blocks[0])
+        , 'intermediate' : IPv4Space(240, _blocks[0], _blocks[1])
+        , 'destination' : IPv4Space(240, _blocks[1], _blocks[2])
+    }
+    # _ip_cfg = _cfg.get('ip')
+    _map = []
+    for key, val in _cfg.items():
+        ip = ips[key]
+        for adr in val:
+            _map.append(
+                {
+                    'ip' : {
+                        'old' : adr
+                        , 'new' : ip.get_next()
+                    }
+                }
+            ) 
+    # _mac_cfg = _cfg.get('mac')
+    # _mac = []
+    # add mac gen
+    # for key, val in _mac_cfg.items():
+    #     ip = ips[key]
+    #     for adr in val:
+    #         _mac.append(
+    #             {
+    #                 'ip' : {
+    #                     'old' : adr
+    #                     , 'new' : ip.get_next()
+    #                 }
+    #             }
+    #         ) 
+    return {'ip.map' : _map}
+
+
+    
+
 def normalize(config_path, pcap, res_path):
+
     timestamp_next_pkt = 0
     
     ###
     ### Parsing 
     ###
 
-    param_dict = parse_config(config_path)
+    param_dict = generate_config(config_path)
 
     ###
     ### Filling dictionaries
@@ -195,4 +308,5 @@ def normalize(config_path, pcap, res_path):
     rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt)    
 
 if __name__ == '__main__':
-    pass
+    print(generate_config(r'D:\Untitled-1.yaml'))
+    #normalize(config_path = sys.argv[1], pcap=sys.argv[2], res_path=sys.argv[3])
