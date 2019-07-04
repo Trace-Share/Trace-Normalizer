@@ -8,7 +8,7 @@ import TMLib.Definitions as TMdef
 
 import TMLib.SubMng as TMm
 
-import subscribers.normalizers
+import TMLib.subscribers.normalizers
 
 import sys
 
