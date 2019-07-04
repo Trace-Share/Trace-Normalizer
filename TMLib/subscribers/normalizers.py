@@ -32,6 +32,35 @@ def timestamp_static_shift(packet, data, prev_timestamp_old, prev_timestamp_new,
     """
     return curr_timestamp_old + data[TMdef.GLOBAL][TMdef.ATTACK]['timestamp_shift']
 
+class MacSpace(object):
+    def __init__(self, block, _from, _to, preserve_prefix=True):
+        self.prefix=preserve_prefix
+        self.to = _to
+
+        if self.prefix:
+            self.rng = [_from, 0 ,0]
+        else:
+            self.rng = [_from, 0, 0, 0, 0, 0]
+
+    def get_next(self, addr):
+        if self.prefix:
+            r = addr[0:4] + self.rng
+        else:
+            r = self.rng
+        r = [str(i) for i in r].join('.')
+        c = 1
+        adr_len = 6
+        if self.prefix:
+            adr_len = 3
+        for i in range(adr_len-1, 0,-1):
+            self.rng[i], c = _carry(self.rng[i], c, 256)
+        if self.rng[1] > self.to:
+            raise ValueError('MAC range exceeded')
+        return r 
+def _carry(a, b, m):
+    a += b
+    return a%m, a==m
+
 """
 Single entry in subsribed_functions represents single tranformation.
 Multiple processing, preprocessing & validation functions may be referenced

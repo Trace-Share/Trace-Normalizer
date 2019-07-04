@@ -130,7 +130,7 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
 
         ## rewrapp packets
         for packet in packets:
-            rewrap.digest(packet)
+            rewrap.digest(packet, recursive=True)
             res_packets.append(packet)
 
         pkt_num = len(res_packets)
@@ -154,7 +154,7 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
 
             if pkt_num == 0: # first packet
                 rewrap.set_timestamp_shift(timestamp_next_pkt - packet.time)
-                rewrap.digest(packet)
+                rewrap.digest(packet, recursive=True)
                 ## Create new pcap
                 scapy.wrpcap(res_path, packet)
             else:
