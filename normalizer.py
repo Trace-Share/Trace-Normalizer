@@ -15,6 +15,8 @@ import sys
 import argparse
 from pathlib import Path
 
+import yaml
+
 #######
 ###  Normalizer funcs
 ########
@@ -121,6 +123,8 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
 
     ## read & write all at once
     pkt_num=0
+    pkt_end=0
+    pkt_ts=[]
     if readwrite == 'bulk':
         ## read all packets
         packets = scapy.rdpcap(pcap)
@@ -135,6 +139,8 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
             res_packets.append(packet)
 
         pkt_num = len(res_packets)
+        pkt_end = res_packets[-1].time
+        pkt_ts = [i.time for i in res_packets]
         scapy.wrpcap(res_path, res_packets)
 
     ## read & write packet by packet
@@ -150,6 +156,7 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
         packet = packets.read_packet() # read next packet
 
         pktdump = None
+        pkt_ts = []
         while (packet): # empty packet == None
             tmp_l[0] = packet # store current packet for writing 
 
@@ -164,7 +171,16 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
                 scapy.wrpcap(res_path, packet, append=True)
 
             pkt_num += 1
+            pkt_end = packet.time
+            pkt_ts.append(pkt_end)
             packet = packets.read_packet() # read next packet
+    
+    return {
+        'packets.count' : pkt_num
+        , 'packets.start' : 0
+        , 'packets.end' : pkt_end
+        , 'packets.timestamps' : pkt_ts
+    }
 
 ####
 ## Config gen
@@ -272,12 +288,29 @@ def generate_config(cfg_path):
     for key, val in _cfg.items():
         for adr in val:
             rev[adr] = key
-    return {'ip.map' : _map, 'ip.norm' : rev}
+    return {'ip.map' : _map, 'ip.norm' : rev}, _cfg
 
+def label(_cfg, glob_dict, rewrap):
+    r = {}
+    for key,val in _cfg.items():
+        r[key] = []
+        for adr in val:
+            new_adr = glob_dict[TMdef.TARGET]['ip_address_map'][adr]
+            r[key].append(new_adr)
+    lbl = {
+        'ip' :
+            {
+                'ip.source' : r['source']
+                , 'ip.intermediate' : r['intermediate']
+                , 'ip.destination' : r['destination']
+            }
+        , 'packets' : rewrap    
+    }
+    return lbl
 
     
 
-def normalize(config_path, pcap, res_path):
+def normalize(config_path, pcap, res_path, label_path):
 
     timestamp_next_pkt = 0
     
@@ -285,7 +318,7 @@ def normalize(config_path, pcap, res_path):
     ### Parsing 
     ###
 
-    param_dict = generate_config(config_path)
+    param_dict, _cfg = generate_config(config_path)
 
     ###
     ### Filling dictionaries
@@ -315,7 +348,17 @@ def normalize(config_path, pcap, res_path):
     ### Reading & rewrapping 
     ###
 
-    rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt)    
+    rw = rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt)  
+
+    ###
+    ### Generating labels
+    ### 
+
+    lbs = label(_cfg, rewrap.data_dict[TMdef.GLOBAL], rw)
+    with label_path.open('w') as ff:
+        yaml.dump(lbs, ff)
+    
+
 
 if __name__ == '__main__':
     # print(generate_config(r'D:\Untitled-1.yaml'))
@@ -329,8 +372,10 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--pcap', help='Path to a PCAP file.', type=Path, required=True)
     parser.add_argument('-o', '--output', help='Path to output PCAP file (creates or overwrites).'
     , type=Path, required=True)
+    parser.add_argument('-l', '--label_output', help='Path to output labels (creater or overwrites).',
+    type=Path, required=True)
 
     args = parser.parse_args()
-    normalize(args.configuration, str(args.pcap), str(args.output))
+    normalize(args.configuration, str(args.pcap), str(args.output), args.label_output)
 
 
