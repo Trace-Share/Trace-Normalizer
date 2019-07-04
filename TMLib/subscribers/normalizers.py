@@ -81,7 +81,7 @@ def mac_dict_atruntime_withprefix(fields):
                 rm = data[TMdef.PACKET].get('mac_remmap')
                 if rm is None:
                     rm = {}
-                    data[TMdef.PACKET] = rm
+                    data[TMdef.PACKET]['mac_remmap'] = rm
                 rm[field] = v
     return f
 
