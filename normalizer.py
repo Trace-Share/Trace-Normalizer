@@ -158,7 +158,7 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
                 ## Create new pcap
                 scapy.wrpcap(res_path, packet)
             else:
-                rewrap.digest(packet)
+                rewrap.digest(packet, recursive=True)
                 ## Apend to existing pcap
                 scapy.wrpcap(res_path, packet, append=True)
 
@@ -189,31 +189,31 @@ class IPv4Space(object):
             raise ValueError('IP range exceeded')
         return r 
                    
-class MacSpace(object):
-    def __init__(self, block, _from, _to, preserve_prefix=True):
-        self.prefix=preserve_prefix
-        self.to = _to
+# class MacSpace(object):
+#     def __init__(self, block, _from, _to, preserve_prefix=True):
+#         self.prefix=preserve_prefix
+#         self.to = _to
 
-        if self.prefix:
-            self.rng = [_from, 0 ,0]
-        else:
-            self.rng = [_from, 0, 0, 0, 0, 0]
+#         if self.prefix:
+#             self.rng = [_from, 0 ,0]
+#         else:
+#             self.rng = [_from, 0, 0, 0, 0, 0]
 
-    def get_next(self, addr):
-        if self.prefix:
-            r = addr[0:4] + self.rng
-        else:
-            r = self.rng
-        r = [str(i) for i in r].join('.')
-        c = 1
-        adr_len = 6
-        if self.prefix:
-            adr_len = 3
-        for i in range(adr_len-1, 0,-1):
-            self.rng[i], c = _carry(self.rng[i], c, 256)
-        if self.rng[1] > self.to:
-            raise ValueError('MAC range exceeded')
-        return r 
+#     def get_next(self, addr):
+#         if self.prefix:
+#             r = addr[0:4] + self.rng
+#         else:
+#             r = self.rng
+#         r = [str(i) for i in r].join('.')
+#         c = 1
+#         adr_len = 6
+#         if self.prefix:
+#             adr_len = 3
+#         for i in range(adr_len-1, 0,-1):
+#             self.rng[i], c = _carry(self.rng[i], c, 256)
+#         if self.rng[1] > self.to:
+#             raise ValueError('MAC range exceeded')
+#         return r 
 
 
 def _carry(a, b, m):
