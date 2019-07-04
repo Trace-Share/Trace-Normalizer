@@ -103,7 +103,7 @@ def ipv4_mac_remmap(field_map):
                         data[TMdef.GLOBAL].to_mac_map(val, new_mac)
     return f
 
-def ip_norm_map_cpy(data, config):
+def ip_norm_map_cpy(data, cfg):
     r = cfg.get('ip.norm')
     if r is not None:
         data[TMdef.GLOBAL]['ip_norm_map'] = r
