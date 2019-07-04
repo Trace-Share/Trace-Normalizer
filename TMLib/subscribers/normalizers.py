@@ -44,7 +44,7 @@ class MacSpace(object):
 
     def get_next(self, addr):
         if self.prefix:
-            r = addr[0:4] + self.rng
+            r = [int(i,16) for i in addr.split(':')[0:4]] + self.rng
         else:
             r = self.rng
         r = [hex(i).replace('0x', '') for i in r].join(':')
