@@ -110,6 +110,7 @@ def ipv4_mac_remmap(field_map):
                     if tp is not None:
                         new_mac = macs[tp].get_next(val)
                         data[TMdef.GLOBAL].to_mac_map(val, new_mac)
+            data[TMdef.PACKET]['mac_remmap'] = {}
     return f
 
 def ip_norm_map_cpy(data, cfg):
