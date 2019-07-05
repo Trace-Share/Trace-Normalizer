@@ -372,7 +372,7 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--pcap', help='Path to a PCAP file.', type=Path, required=True)
     parser.add_argument('-o', '--output', help='Path to output PCAP file (creates or overwrites).'
     , type=Path, required=True)
-    parser.add_argument('-l', '--label_output', help='Path to output labels (creater or overwrites).',
+    parser.add_argument('-l', '--label_output', help='Path to output labels (creates or overwrites).',
     type=Path, required=True)
 
     args = parser.parse_args()
