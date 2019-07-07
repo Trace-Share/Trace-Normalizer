@@ -29,3 +29,18 @@ destination:
     - 2.2.2.2
     - 2.2.2.3
 ```
+
+## Crawler
+
+Script for searching for all IPv4 and IPv6 addresses in PCAP. Addresses outputted in yaml format.
+```yaml
+ip:
+-0.0.0.0
+```
+
+`python crawler.py --pcap capture.pcap --output output.yaml`
+
+#### Parameters
+* `--pcap` Path to the PCAP file
+* `--output` Output path for yaml of IPs, including filename
+
