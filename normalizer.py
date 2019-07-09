@@ -79,6 +79,8 @@ def enqueue_functions(param_dict, rewrap):
     # ICMP
     , 'icmp_ip_src_change'
     , 'icmp_ip_dst_change'
+    #TCP
+    , 'tcp_auto_checksum'
     # DNS
     , 'dns_change_ips'
     # HTTP
