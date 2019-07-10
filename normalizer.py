@@ -381,7 +381,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.label_output is None:
-        arg.label_output = args.output.parent / Path(args.output.stem + '.yaml')
+        args.label_output = args.output.parent / Path(args.output.stem + '.yaml')
 
     normalize(args.configuration, str(args.pcap), str(args.output), args.label_output)
 
