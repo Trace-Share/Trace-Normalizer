@@ -42,39 +42,42 @@ Script for searching for all occurrences of IPv4 and IPv6 addresses in given tra
 
 Use the following command to start searching for addresses in given trace:
 ```bash
-$ ./crawler.py --pcap <input_file> --output <output>
+$ ./crawler.py -p <input_file> -o <output>
 ```
-* `--pcap` Path to the PCAP file
-* `--output` Output path for YAML file with all IPs found
+* `-p`, `--pcap` Path to the PCAP file
+* `-o`, `--output` Output path for YAML file with all IPs found
 
 See the following example with searching of IP addresses in *capture.pcap* file and producing the result in *output.yml* file:
 ```bash
-$ ./crawler.py --pcap capture.pcap --output output.yml
+$ ./crawler.py -p capture.pcap -o output.yml
 ```
 
 ### Normalizer
 
-`python normalizer.py --configuration config.json --pcap capture.pcap --output normalized.pcap --label_output labels.yaml`
-#### Parameters
+Script for normalization of a given trace file according to the configuration with addresses characterization. The script produces normalized file and labels in YAML format.
 
-* `--configuration` Path to the configuration file
-* `--pcap` Path to the PCAP file
-* `--output` Output path for normalized PCAP, including filename
-* `--label_output` Output for labels in yaml format, including filename
-
-#### Configuration
-
-Json or Yaml file in following format
+Normalizer requires a simple configuration file providing a categorization of IPv4 and IPv6 addresses. Use Crawler to get info about all addresses in the given trace. Based on input trace analysis, the input YAML configuration may look as follows:
 ```yaml
 source:
-    - 0.0.0.0
-    - 0.0.0.1
+  - 10.0.0.2
 intermediate:
-    - 1.1.1.1
-    - 1.1.1.2
 destination:
-    - 2.2.2.2
-    - 2.2.2.3
+  - 10.0.0.3
+  - 10.0.0.6
+```
+
+Use the following command to start normalization of given trace abased on the given configuration:
+```bash
+$ ./normalizer.py -c <configuration_file> -p <input_file> -o <output_file> -l <output_labels_file>
+```
+* `-c`, `--configuration` Path to the configuration file
+* `-p`, `--pcap` Path to the trace file
+* `-o`, `--output` Output path for normalized trace file
+* `-l`, `--label_output` Output for labels in YAML format
+
+See the following example with normalization of *capture.pcap* file based on the configuration in *config.yml* producing *normalized.pcap* trace file ane labels in *labels.yml*:
+```bash
+$ ./normalizer.py -c config.yml -p capture.pcap -o normalized.pcap -l labels.yaml
 ```
 
 
