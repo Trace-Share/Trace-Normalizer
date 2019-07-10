@@ -373,7 +373,7 @@ if __name__ == '__main__':
     parser.add_argument('-c', '--configuration', help='Path to a Json or Yaml configuration file.'
     , type=Path, required=True)
     parser.add_argument('-p', '--pcap', help='Path to a PCAP file.', type=Path, required=True)
-    parser.add_argument('-o', '--output', help='Path to output PCAP file (creates or overwrites).'
+    parser.add_argument('-o', '--output', help='Path to output PCAP file (creates or overwrites), or output directory (new filename will be "normalized_<pcap name>").'
     , type=Path, required=True)
     parser.add_argument('-l', '--label_output', help='Path to output labels (creates or overwrites).',
     type=Path, required=False, default=None)
@@ -381,7 +381,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.output.is_dir():
-        args.output = args.output / Path(args.pcap.name)
+        args.output = args.output / Path('normalized_{}'.format(args.pcap.name))
 
     if args.label_output is None:
         args.label_output = args.output.parent / Path(args.output.stem + '.yaml')
