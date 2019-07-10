@@ -1,46 +1,88 @@
-# Trace-Normalizer
-Toolset for nromalization of network traffic traces
+# Trace-Share: Trace-Normalizer
 
-Normalizer replaces IP & MAC addresses, shifts pcap to start with 0th epoch. IP addresses are split into 3 categories (source, intermediate, destination) and assigned into blocks based on them (-240.85.0.0, 240.85.0.0-240.170.0.0, 240.170.0.0-). Similliary MAC addresses are split based on division of IP addresses, however, retaining OUIs.
+Toolset for normalization of network traffic traces.
 
-Normalizer outputs normalized PCAP (using functions defined in Trace-Mix module) and labels.
+### Table of Contents
+
+* [Description](#description)
+* [Requirements](#requirements)
+* [Usage](#usage)
+  + [Crawler](#crawler)
+  + [Normalizer](#normalizer)
+* [Contribution](#contribution)
+
+
+## Description
+
+Trace-Normalizer is a toolset for normalization of network traffic traces to ease their further sharing, manipulation, and injection into the background traffic. The normalization consists of **IP and MAC addresses replacement** to reserved blocks, and **shifting capture time** to zero epoch time. After the normalization, the capture can be annotated and provided as an annotated unit.
+
+IP addresses are divided into the following reserved blocks according to role of the corresponding host:
+* **source:** <240.0.0.2, 240.84.255.254>
+* **intermediate:** <240.85.0.2, 240.169.255.254>
+* **destination:** <240.170.0.2, 240.255.255.254>
+
+Similarly, MAC addresses are split based on the division of IP addresses, however, retaining OUIs.
+
+
+## Requirements
+
+Trace-Normalizer toolset consists of two scripts written in [Python 3](https://www.python.org/) language. All required Python modules are listed in [./requirements.txt](./requirements.txt) file. Use the following command to simple requirements installation:
+```bash
+$ pip3 install -r requirements.txt
+```
+
 
 ## Usage
 
-`python normalizer.py --configuration config.json --pcap capture.pcap --output normalized.pcap --label_output labels.yaml`
-#### Parameters
+Trace-Normalizer toolset provides two scripts to ease normalization of network traffic traces. The first script is [**crawler.py**](./crawler.py) able to search all occurrences of IPv4 and IPv6 addresses in given PCAP. The second script is [**normalizer.py**](./normalizer.py) for normalization of given traces according to the given configuration.
 
-* `--configuration` Path to the configuration file
-* `--pcap` Path to the PCAP file
-* `--output` Output path for normalized PCAP, including filename
-* `--label_output` Output for labels in yaml format, including filename
+### Crawler
 
-#### Configuration
+Script for searching for all occurrences of IPv4 and IPv6 addresses in given trace file. The output is produced as YAML file listing all the addresses found.
 
-Json or Yaml file in following format
+Use the following command to start searching for addresses in given trace:
+```bash
+$ ./crawler.py -p <input_file> -o <output>
+```
+* `-p`, `--pcap` Path to the PCAP file
+* `-o`, `--output` Output path for YAML file with all IPs found
+
+See the following example with searching of IP addresses in *capture.pcap* file and producing the result in *output.yml* file:
+```bash
+$ ./crawler.py -p capture.pcap -o output.yml
+```
+
+### Normalizer
+
+Script for normalization of a given trace file according to the configuration with addresses characterization. The script produces normalized file and labels in YAML format.
+
+Normalizer requires a simple configuration file providing a categorization of IPv4 and IPv6 addresses. Use Crawler to get info about all addresses in the given trace. Based on input trace analysis, the input YAML configuration may look as follows:
 ```yaml
 source:
-    - 0.0.0.0
-    - 0.0.0.1
+  - 10.0.0.2
 intermediate:
-    - 1.1.1.1
-    - 1.1.1.2
 destination:
-    - 2.2.2.2
-    - 2.2.2.3
+  - 10.0.0.3
+  - 10.0.0.6
 ```
 
-## Crawler
+Use the following command to start normalization of given trace abased on the given configuration:
+```bash
+$ ./normalizer.py -c <configuration_file> -p <input_file> -o <output_file> -l <output_labels_file>
+```
+* `-c`, `--configuration` Path to the configuration file
+* `-p`, `--pcap` Path to the trace file
+* `-o`, `--output` Output path for normalized trace file
+* `-l`, `--label_output` Output for labels in YAML format
 
-Script for searching for all IPv4 and IPv6 addresses in PCAP. Addresses outputted in yaml format.
-```yaml
-ip:
--0.0.0.0
+See the following example with normalization of *capture.pcap* file based on the configuration in *config.yml* producing *normalized.pcap* trace file ane labels in *labels.yml*:
+```bash
+$ ./normalizer.py -c config.yml -p capture.pcap -o normalized.pcap -l labels.yaml
 ```
 
-`python crawler.py --pcap capture.pcap --output output.yaml`
 
-#### Parameters
-* `--pcap` Path to the PCAP file
-* `--output` Output path for yaml of IPs, including filename
+## Contribution
 
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+
+*If you are interested in research collaborations, don't hesitate to contact us at  [https://csirt.muni.cz](https://csirt.muni.cz/about-us/contact?lang=en)!*
