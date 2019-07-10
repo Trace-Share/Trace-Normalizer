@@ -376,9 +376,13 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output', help='Path to output PCAP file (creates or overwrites).'
     , type=Path, required=True)
     parser.add_argument('-l', '--label_output', help='Path to output labels (creates or overwrites).',
-    type=Path, required=True)
+    type=Path, default=None)
 
     args = parser.parse_args()
+
+    if args.label_output is None:
+        arg.label_output = args.output.parent / Path(args.output.stem + '.yaml')
+
     normalize(args.configuration, str(args.pcap), str(args.output), args.label_output)
 
 
