@@ -380,6 +380,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    if args.output.is_dir():
+        args.output = args.output / Path(args.pcap.name)
+
     if args.label_output is None:
         args.label_output = args.output.parent / Path(args.output.stem + '.yaml')
 
