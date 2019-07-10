@@ -34,22 +34,23 @@ $ pip3 install -r requirements.txt
 
 ## Usage
 
-
+Trace-Normalizer toolset provides two scripts to ease normalization of network traffic traces. The first script is [**crawler.py**](./crawler.py) able to search all occurrences of IPv4 and IPv6 addresses in given PCAP. The second script is [**normalizer.py**](./normalizer.py) for normalization of given traces according to the given configuration.
 
 ### Crawler
 
-Script for searching for all IPv4 and IPv6 addresses in PCAP. Addresses outputted in yaml format.
-```yaml
-ip:
--0.0.0.0
+Script for searching for all occurrences of IPv4 and IPv6 addresses in given trace file. The output is produced as YAML file listing all the addresses found.
+
+Use the following command to start searching for addresses in given trace:
+```bash
+$ ./crawler.py --pcap <input_file> --output <output>
 ```
-
-`python crawler.py --pcap capture.pcap --output output.yaml`
-
-#### Parameters
 * `--pcap` Path to the PCAP file
-* `--output` Output path for yaml of IPs, including filename
+* `--output` Output path for YAML file with all IPs found
 
+See the following example with searching of IP addresses in *capture.pcap* file and producing the result in *output.yml* file:
+```bash
+$ ./crawler.py --pcap capture.pcap --output output.yml
+```
 
 ### Normalizer
 
