@@ -181,7 +181,7 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
         'packets.count' : pkt_num
         , 'packets.start' : 0
         , 'packets.end' : pkt_end
-        , 'packets.timestamps' : pkt_ts
+        # , 'packets.timestamps' : pkt_ts
     }
 
 ####
