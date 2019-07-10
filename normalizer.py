@@ -190,9 +190,10 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
 
 class IPv4Space(object):
     def __init__(self, block, _from, _to):
+        self._from = _from
         self.to = _to
 
-        self.rng = [block, _from, 0 ,0 ]
+        self.rng = [block, _from, 0 ,2 ]
 
     def get_next(self):
         r = '{}.{}.{}.{}'.format(
@@ -204,7 +205,7 @@ class IPv4Space(object):
         c = 1
         for i in range(3, 0,-1):
             self.rng[i], c = _carry(self.rng[i], c, 256)
-        if self.rng[1] > self.to:
+        if self.rng[1] > self.to or self.rng[1] < self._from:
             raise ValueError('IP range exceeded')
         return r 
                    
@@ -252,11 +253,11 @@ def generate_config(cfg_path):
     }
     """
     _cfg = parse_config(cfg_path)
-    _blocks = [(255*i)//len(_cfg.keys()) for i in range(1, len(_cfg.keys())+1, 1) ]
+    # _blocks = [(255*i)//len(_cfg.keys()) for i in range(1, len(_cfg.keys())+1, 1) ]
     ips = {
-        'source' : IPv4Space(240, 0, _blocks[0])
-        , 'intermediate' : IPv4Space(240, _blocks[0], _blocks[1])
-        , 'destination' : IPv4Space(240, _blocks[1], _blocks[2])
+        'source' : IPv4Space(240, 0, 84)
+        , 'intermediate' : IPv4Space(240, 85, 169)
+        , 'destination' : IPv4Space(240, 169, 255)
     }
     # _ip_cfg = _cfg.get('ip')
     _map = []
