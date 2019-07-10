@@ -285,7 +285,7 @@ def generate_config(cfg_path):
     #                 }
     #             }
     #         ) 
-
+    
     rev = {}
     for key, val in _cfg.items():
         for adr in val:

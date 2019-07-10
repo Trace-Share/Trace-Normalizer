@@ -11,7 +11,7 @@ def crawl(packet, f):
         return
     
     for field in type(packet).fields_desc:
-        f(packet.getfieldval(field.name))
+        f(packet, packet.getfieldval(field.name))
 
     crawl(packet.payload, f)
 
@@ -59,11 +59,43 @@ def ip_in_bytes(x):
 class IPDetector(object):
     def __init__(self):
         self.ips = []
+        self.orphaned_mac = []
+        self.had_IP = False
+        self.tmp_macs = []
+        self.layer_counter=0
+        self.found_macs=set()
+    
+    def __call__(self, packet, x):
+        self.ip_detector(x)
+        self.ip_layer_detector(packet)
+        self.layer_counter += 1
+
+    def ip_layer_detector(self, packet):
+        if self.layer_counter==1:
+            self.had_IP = self.had_IP or isinstance(packet, scapy.IP) or isinstance(packet, scapy.IPv6)
+        elif self.layer_counter==0:
+            if isinstance(packet, scapy.Ether):
+                self.tmp_macs.append(packet.getfieldval('src'))
+                self.tmp_macs.append(packet.getfieldval('dst'))
+
+
     def ip_detector(self,x):
         if isinstance(x, str):
             self.ips += ip_in_str(x)
         elif isinstance(x, bytes):
             self.ips += ip_in_bytes(x)
+    def next(self):
+        if not self.had_IP:
+            for i in self.tmp_macs:
+                if i not in self.found_macs:
+                    self.orphaned_mac.append(i)
+        else:
+            for i in self.tmp_macs:
+                self.found_macs.add(i)
+        self.had_IP=False
+        self.tmp_macs=[]
+        self.layer_counter=0
+        
 
 def ip_scrape(pcap, outfile):
     pcap=str(pcap)
@@ -73,12 +105,14 @@ def ip_scrape(pcap, outfile):
 
     packet = packets.read_packet() # read next packet
     while (packet): # empty packet == None
-        crawl(packet, ipd.ip_detector)
+        crawl(packet, ipd)
         packet = packets.read_packet() # read next packet
+        ipd.next()
     packets.close()
 
     output = {
         'ip' : list(set(ipd.ips))
+        , 'mac.orphaned' : list(set(ipd.orphaned_mac)) 
     }
 
     with outfile.open('w') as ff:
