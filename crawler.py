@@ -6,18 +6,19 @@ import scapy.all as scapy
 
 import yaml
 
-def crawl(packet, f):
+def crawl(packet, f, pnum):
     if isinstance(packet, scapy.NoPayload) or packet is None:
         return
     
     for field in type(packet).fields_desc:
-        f(packet, packet.getfieldval(field.name))
+        f(packet, packet.getfieldval(field.name), pnum=pnum)
 
-    crawl(packet.payload, f)
+    crawl(packet.payload, f, pnum)
 
-ipv4_regex = re.compile(r'((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))')
+ipv4_regex = re.compile(r'(?:(?:\D|^)((?:(?:25[0-5]|2[0-4][0-9]|[1]?[1-9]?[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|[1]?[1-9]?[0-9]))[^0-9]*(?:\D|$))')
 ipv6_regex = re.compile(
     r'('
+    r'(?:[^0-9-a-fA-F\w:]||^)'
     r'(?:[0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|'          # 1:2:3:4:5:6:7:8
     r'(?:[0-9a-fA-F]{1,4}:){1,7}:|'                         # 1::                              1:2:3:4:5:6:7::
     r'(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|'         # 1::8             1:2:3:4:5:6::8  1:2:3:4:5:6::8
@@ -34,6 +35,7 @@ ipv6_regex = re.compile(
     r'(?:[0-9a-fA-F]{1,4}:){1,4}:'
     r'(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}'
     r'(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])'           # 2001:db8:3:4::192.0.2.33  64:ff9b::192.0.2.33 (IPv4-Embedded IPv6 Address)
+    r'(?:[^0-9-a-fA-F\w:]|$)'
     r')'
 )
 
@@ -64,9 +66,11 @@ class IPDetector(object):
         self.tmp_macs = []
         self.layer_counter=0
         self.found_macs=set()
+        self.ip_protocol_map={}
+        self.ip_pktnum_map={}
     
-    def __call__(self, packet, x):
-        self.ip_detector(x)
+    def __call__(self, packet, x, pnum):
+        self.ip_detector(x,packet, pnum)
         self.ip_layer_detector(packet)
         self.layer_counter += 1
 
@@ -79,11 +83,25 @@ class IPDetector(object):
                 self.tmp_macs.append(packet.getfieldval('dst'))
 
 
-    def ip_detector(self,x):
+    def ip_detector(self,x, packet, pnum):
+        q=[]
         if isinstance(x, str):
-            self.ips += ip_in_str(x)
+            q += ip_in_str(x)
         elif isinstance(x, bytes):
-            self.ips += ip_in_bytes(x)
+            q += ip_in_bytes(x)
+        if len(q) > 0:
+            for i in q:
+                ip_p:set = self.ip_protocol_map.get(i)
+                if ip_p is None:
+                    ip_p=set()
+                    self.ip_protocol_map[i]=ip_p
+                ip_p.add(str(type(packet)))
+                ip_c:dict = self.ip_pktnum_map.get(i)
+                if ip_c is None:
+                    ip_c={'first_observed':pnum, 'count':0}
+                    self.ip_pktnum_map[i]=ip_c
+                ip_c['count'] += 1
+                
     def next(self):
         if not self.had_IP:
             for i in self.tmp_macs:
@@ -104,14 +122,19 @@ def ip_scrape(pcap, outfile):
     packets = scapy.PcapReader(pcap)
 
     packet = packets.read_packet() # read next packet
+    pnum=0
     while (packet): # empty packet == None
-        crawl(packet, ipd)
+        crawl(packet, ipd, pnum=pnum)
         packet = packets.read_packet() # read next packet
         ipd.next()
+        pnum+=1
     packets.close()
 
+    ipd.ips = ipd.ip_protocol_map.keys()
     output = {
         'ip' : list(set(ipd.ips))
+        , 'ip.searched_protocols' : { key: list(val) for key,val in ipd.ip_protocol_map.items() }
+        , 'ip.occurrences' : ipd.ip_pktnum_map
         , 'mac.orphaned' : list(set(ipd.orphaned_mac)) 
     }
 
