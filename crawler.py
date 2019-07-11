@@ -201,8 +201,6 @@ def ip_scrape(pcap, outfile):
         ipd.next()
         pnum+=1
     packets.close()
-    # print(mpd.mac_ip_map)
-    print(mpd.mac_ip_map.get('ff:ff:ff:ff:ff:ff'))
     ipd.ips = list(ipd.ip_protocol_map.keys())
     output = {
         'ip.groups' : {
