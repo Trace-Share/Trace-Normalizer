@@ -95,6 +95,18 @@ def enqueue_functions(param_dict, rewrap):
     return fill, config_validate
 
 def validate_and_fill_dict(param_dict, rewrap, fill, validate):
+    """
+    Execute validation functions
+
+    :param param_dict: parsed config
+    :type param_dict: dict
+    :param rewrap: rewrapper
+    :type rewrap: ReWrapper
+    :param fill: filling functions
+    :type fill: List[Callable]
+    :param validate: validation functions
+    :type validate: List[Callable]
+    """
     valid = True
     data = rewrap.data_dict
     for f in validate:
@@ -189,6 +201,9 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
 ####
 
 class IPv4Space(object):
+    """
+    Generator of IP space.
+    """
     def __init__(self, block, _from, _to):
         self._from = _from
         self.to = _to
@@ -196,6 +211,9 @@ class IPv4Space(object):
         self.rng = [block, _from, 0 ,2 ]
 
     def get_next(self):
+        """
+        Generates new IP address within space. Raises ValueError if no more IPv4 addresses can be generated.
+        """
         r = '{}.{}.{}.{}'.format(
             str(self.rng[0])
             , str(self.rng[1])
@@ -237,10 +255,26 @@ class MacSpace(object):
 
 
 def _carry(a, b, m):
+    """
+    Add with carry
+
+    :return: (a+b)%m, 1 or 0
+    """
     a += b
     return a%m, a==m
 
 def build_mac_categories(macs, ips):
+    """
+    Creates dictionary splitting mac addresses into categories based on IPs
+    {
+        source : []
+        , intermediate : []
+        , destination : []
+    }
+    :param macs: mac.associations entry
+    :param ips: ip.groups entry
+    :return: dictionary similliar to ip.group, for mac addresses
+    """
     _ip_map = {}
     for key, val in ips.items():
         for ip in val:
@@ -289,6 +323,9 @@ def generate_config(cfg_path):
         , 'intermediate' : IPv4Space(240, 85, 169)
         , 'destination' : IPv4Space(240, 170, 255)
     }
+    ##
+    ## Build up ip.map
+    ##
     _ip_cfg = _cfg.get('ip.groups')
     _map = []
     for key, val in _ip_cfg.items():
@@ -306,6 +343,9 @@ def generate_config(cfg_path):
                     }
                 }
             )
+    ##
+    ## Build up Mac map
+    ##
     macs = TMLib.subscribers.normalizers.macs
     _mac_cfg = build_mac_categories(_cfg.get('mac.associations'), _ip_cfg )
     _mac_map = []
@@ -332,6 +372,13 @@ def generate_config(cfg_path):
     return {'ip.map' : _map, 'ip.norm' : rev, 'mac.map' : _mac_map}, _cfg
 
 def label(_cfg, glob_dict, rewrap):
+    """
+    Writes labels into yaml file
+
+    :param _cfg: parsed input configuration file
+    :param glob_dict: global data dict
+    :param rewrap: dict of packet info generated during rewrapping
+    """
     r = {}
     for key,val in _cfg['ip.groups'].items():
         r[key] = []
