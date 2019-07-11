@@ -333,7 +333,7 @@ def generate_config(cfg_path):
 
 def label(_cfg, glob_dict, rewrap):
     r = {}
-    for key,val in _cfg.items():
+    for key,val in _cfg['ip.groups'].items():
         r[key] = []
         for adr in val:
             new_adr = glob_dict[TMdef.TARGET]['ip_address_map'][adr]
