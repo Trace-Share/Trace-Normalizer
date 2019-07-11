@@ -187,7 +187,7 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
                     rewrap.digest(packet, recursive=True)
                     ## Apend to existing pcap
                     scapy.wrpcap(res_path, packet, append=True)
-            except Exception e:
+            except Exception as e:
                 print('Error while digesting packet num {}'.format(pkt_num))
             pkt_num += 1
             pkt_end = packet.time
