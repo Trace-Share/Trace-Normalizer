@@ -318,7 +318,13 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--pcap', help='Path to input PCAP file.'
     , type=Path, required=True)
     parser.add_argument('-o', '--output', help='Path to output IP yaml (creates or overwrites).',
-    type=Path, required=True)
+    type=Path, required=False, default=None)
 
     args = parser.parse_args()
+
+    if args.output is None:
+        args.output = args.pcap.parent
+    if args.output.is_dir():
+        args.output = args.output / Path(args.pcap.stem + '.yaml')
+
     ip_scrape(args.pcap, args.output)
