@@ -41,6 +41,7 @@ class MacSpace(object):
     def __init__(self, _from, _to, preserve_prefix=True):
         self.prefix=preserve_prefix
         self.to = _to
+        self._from = _from
 
         if self.prefix:
             self.rng = [_from, 0 ,0]
