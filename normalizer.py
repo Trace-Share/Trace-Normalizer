@@ -151,7 +151,7 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
         for packet in packets:
             try:
                 rewrap.digest(packet, recursive=True)
-            except Exception e:
+            except Exception as e:
                 print('Error while digesting packet num {}'.format(pkt_num))
             res_packets.append(packet)
             pkt_num+=1
