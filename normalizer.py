@@ -264,6 +264,11 @@ def build_mac_categories(macs, ips):
         _cfg[_a.pop()].append(asssociation['mac'])
     return _cfg
             
+def mac_isException(adr):
+    return adr == '00:00:00:00:00:00' or adr == 'ff:ff:ff:ff:ff:ff'
+
+def ip_isException(adr):
+    return adr == '0.0.0.0' or adr == '::'
 
 def generate_config(cfg_path):
     """
@@ -289,11 +294,15 @@ def generate_config(cfg_path):
     for key, val in _ip_cfg.items():
         ip = ips[key]
         for adr in val:
+            if ip_isException(adr):
+                new_adr = adr
+            else:
+                new_adr = ip.get_next()
             _map.append(
                 {
                     'ip' : {
                         'old' : adr
-                        , 'new' : ip.get_next()
+                        , 'new' : new_adr
                     }
                 }
             )
@@ -303,11 +312,15 @@ def generate_config(cfg_path):
     for key, val in _mac_cfg.items():
         mac = macs[key]
         for adr in val:
+            if mac_isException(adr):
+                new_adr = adr
+            else:
+                new_adr = mac.get_next(adr)
             _mac_map.append(
                 {
                     'mac' : {
                         'old' : adr
-                        , 'new' : macs.get_next()
+                        , 'new' : new_adr
                     }
                 }
             ) 

@@ -6,6 +6,12 @@ import scapy.all as scapy
 
 import yaml
 
+def mac_isException(adr):
+    return adr == '00:00:00:00:00:00' or adr == 'ff:ff:ff:ff:ff:ff'
+
+def ip_isException(adr):
+    return adr == '0.0.0.0' or adr == '::'
+
 def crawl(packet, f, pnum):
     if isinstance(packet, scapy.NoPayload) or packet is None:
         return
@@ -93,7 +99,13 @@ class MacAssociations:
         elif isinstance(packet, scapy.IP) or isinstance(packet, scapy.IPv6):
             _ip = packet.getfieldval('src')
             _mac = self.local.get('src')
-            if _r is not None and _mac is not None:
+            if _ip is not None and _mac is not None:
+                entry:set = self.mac_ip_map.get(_mac)
+                entry.add(_ip)
+
+            _ip = packet.getfieldval('dst')
+            _mac = self.local.get('dst')
+            if _ip is not None and _mac is not None:
                 entry:set = self.mac_ip_map.get(_mac)
                 entry.add(_ip)
 
@@ -184,6 +196,9 @@ class Bush(object):
         for f in self.fs:
             f(packet, x, pnum)        
 
+ignored_macs = ['00:00:00:00:00:00', 'ff:ff:ff:ff:ff:ff']
+ignored_ips = ['0.0.0.0', '::']
+
 def ip_scrape(pcap, outfile):
     pcap=str(pcap)
     ipd = IPDetector()
@@ -201,6 +216,10 @@ def ip_scrape(pcap, outfile):
         ipd.next()
         pnum+=1
     packets.close()
+    for m in ignored_macs:
+        mpd.mac_ip_map.pop(m, None)
+    for i in ignored_ips:
+        ipd.ip_protocol_map.pop(i, None)
     ipd.ips = list(ipd.ip_protocol_map.keys())
     output = {
         'ip.groups' : {
@@ -211,7 +230,7 @@ def ip_scrape(pcap, outfile):
         , 'ip.searched_protocols' : [ {'ip':key, 'protocols':list(val)} for key,val in ipd.ip_protocol_map.items() ]
         , 'ip.occurrences' : [val for key, val in  ipd.ip_pktnum_map.items() if (lambda x,y : x.update(ip=y))(val, key) is None ]
         , 'mac.associations' : [{'mac' : key, 'ips' : list(val)} for key, val in mpd.mac_ip_map.items()]
-        , 'mac.orphaned' : list(set(ipd.orphaned_mac)) 
+        # , 'mac.orphaned' : list(set(ipd.orphaned_mac)) 
     }
 
     with outfile.open('w') as ff:
