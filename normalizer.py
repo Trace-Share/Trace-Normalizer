@@ -288,6 +288,8 @@ def build_mac_categories(macs, ips):
     for asssociation in macs:
         _a = set()
         for i in asssociation['ips']:
+            if ip_isException(i):
+                continue
             _a.add(_ip_map[i])
         if len(_a) != 1:
             ## is it illegal for both to be in?
