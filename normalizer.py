@@ -149,8 +149,12 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
 
         ## rewrapp packets
         for packet in packets:
-            rewrap.digest(packet, recursive=True)
+            try:
+                rewrap.digest(packet, recursive=True)
+            except Exception e:
+                print('Error while digesting packet num {}'.format(pkt_num))
             res_packets.append(packet)
+            pkt_num+=1
 
         pkt_num = len(res_packets)
         pkt_end = res_packets[-1].time
@@ -173,17 +177,18 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
         pkt_ts = []
         while (packet): # empty packet == None
             tmp_l[0] = packet # store current packet for writing 
-
-            if pkt_num == 0: # first packet
-                rewrap.set_timestamp_shift(timestamp_next_pkt - packet.time)
-                rewrap.digest(packet, recursive=True)
-                ## Create new pcap
-                scapy.wrpcap(res_path, packet)
-            else:
-                rewrap.digest(packet, recursive=True)
-                ## Apend to existing pcap
-                scapy.wrpcap(res_path, packet, append=True)
-
+            try:
+                if pkt_num == 0: # first packet
+                    rewrap.set_timestamp_shift(timestamp_next_pkt - packet.time)
+                    rewrap.digest(packet, recursive=True)
+                    ## Create new pcap
+                    scapy.wrpcap(res_path, packet)
+                else:
+                    rewrap.digest(packet, recursive=True)
+                    ## Apend to existing pcap
+                    scapy.wrpcap(res_path, packet, append=True)
+            except Exception e:
+                print('Error while digesting packet num {}'.format(pkt_num))
             pkt_num += 1
             pkt_end = packet.time
             pkt_ts.append(pkt_end)
