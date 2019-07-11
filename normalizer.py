@@ -338,7 +338,7 @@ def generate_config(cfg_path):
     ips = {
         'source' : IPSpace(IPv4Space(240, 0, 84), IPv6Space( '2001:DB8', 0, 21845-1))
         , 'intermediate' : IPSpace(IPv4Space(240, 85, 169), IPv6Space( '2001:DB8', 21845, 43690-1))
-        , 'destination' : IPSpace(IPv4Space(240, 170, 255), IPv6Space( '2001:DB8', 43690, 65535-1))
+        , 'destination' : IPSpace(IPv4Space(240, 170, 255), IPv6Space( '2001:DB8', 43690, 65535))
     }
     ##
     ## Build up ip.map

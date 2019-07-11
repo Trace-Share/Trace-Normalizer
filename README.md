@@ -19,9 +19,9 @@ Toolset for normalization of network traffic traces.
 Trace-Normalizer is a toolset for normalization of network traffic traces to ease their further sharing, manipulation, and injection into the background traffic. The normalization consists of **IP and MAC addresses replacement** to reserved blocks, and **shifting capture time** to zero epoch time. After the normalization, the capture can be annotated and provided as an annotated unit.
 
 IP addresses are divided into the following reserved blocks according to role of the corresponding host:
-* **source:** <240.0.0.2, 240.84.255.254>
-* **intermediate:** <240.85.0.2, 240.169.255.254>
-* **destination:** <240.170.0.2, 240.255.255.254>
+* **source:** <240.0.0.2, 240.84.255.254> / <2001:db8::, 2001:DB8:5554:ffff:ffff:ffff:ffff:ffff>
+* **intermediate:** <240.85.0.2, 240.169.255.254> / <2001:DB8:5555::, 2001:DB8:aaa9:ffff:ffff:ffff:ffff:ffff>
+* **destination:** <240.170.0.2, 240.255.255.254> / <2001:DB8:aaaa::, 2001:DB8:ffff:ffff:ffff:ffff:ffff:ffff>
 
 Similarly, MAC addresses are split based on the division of IP addresses, however, retaining OUIs.
 
