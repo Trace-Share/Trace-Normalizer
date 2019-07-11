@@ -40,6 +40,7 @@ def to_hex(i):
 class MacSpace(object):
     def __init__(self, _from, _to, preserve_prefix=True):
         self.prefix=preserve_prefix
+        self._from = _from
         self.to = _to
 
         if self.prefix:
@@ -59,7 +60,7 @@ class MacSpace(object):
             adr_len = 3
         for i in range(adr_len-1, 0,-1):
             self.rng[i], c = _carry(self.rng[i], c, 256)
-        if self.rng[1] > self.to:
+        if self.rng[1] > self.to or self._from > self.rng[1]:
             raise ValueError('MAC range exceeded')
         return r 
 
