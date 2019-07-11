@@ -2,13 +2,20 @@ ip.groups:
   destination: []
   intermediate:
   - 139.25.22.2
+  - 139.25.22.102
   source: []
 ip.occurrences:
 - count: 156
   first_observed: 0
   ip: 139.25.22.2
+- count: 156
+  first_observed: 0
+  ip: 139.25.22.102
 ip.searched_protocols:
 - ip: 139.25.22.2
+  protocols:
+  - <class 'scapy.layers.inet.IP'>
+- ip: 139.25.22.102
   protocols:
   - <class 'scapy.layers.inet.IP'>
 mac.associations:
