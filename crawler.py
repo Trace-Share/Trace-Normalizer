@@ -58,6 +58,68 @@ def ip_in_bytes(x):
             continue
     return found
 
+mac_regex = re.compile(r'')
+
+class MacAssociations:
+    arp_fields = [
+        ('hwsrc', 'psrc')
+        , ('hwdst', 'pdst')
+    ]
+
+    def __init__(self):
+        self.mac_ip_map = {}
+        self.local = {}
+    
+    def __call__(self, packet, x, pnum):
+        self.ip_in_mac(packet)
+        self.ip_in_arp(packet)
+    
+    def ip_in_mac(self, packet):
+        if isinstance(packet, scapy.Ether):
+            _mac = packet.getfieldval('src')
+            self.local['src'] = _mac
+            entry:set = self.mac_ip_map.get(_mac)
+            if entry is None:
+                entry = set()
+                self.mac_ip_map[_mac] = entry
+            
+            _mac = packet.getfieldval('dst')
+            self.local['dst'] = _mac
+            entry:set = self.mac_ip_map.get(_mac)
+            if entry is None:
+                entry = set()
+                self.mac_ip_map[_mac] = entry
+
+        elif isinstance(packet, scapy.IP) or isinstance(packet, scapy.IPv6):
+            _ip = packet.getfieldval('src')
+            _mac = self.local.get('src')
+            if _r is not None and _mac is not None:
+                entry:set = self.mac_ip_map.get(_mac)
+                entry.add(_ip)
+
+                    
+    def ip_in_arp(self, packet):
+        def _it(packet, ha, pa):
+            ha_val = packet.getfieldval(ha)
+            pa_val = packet.getfieldval(pa)
+            if ha_val is not None:
+                entry:set = self.mac_ip_map.get(ha_val)
+                if entry is None:
+                    entry = set()
+                    self.mac_ip_map[ha_val] = entry
+                if pa_val is not None:
+                    entry.add(pa_val)
+        if not isinstance(packet, scapy.ARP):
+            return
+        for hw, p in self.arp_fields:
+            _it(packet, hw, p)
+                
+    def mac_detector(self, x):
+        pass
+
+    def next(self):
+        self.local.clear()
+
 class IPDetector(object):
     def __init__(self):
         self.ips = []
@@ -113,28 +175,44 @@ class IPDetector(object):
         self.had_IP=False
         self.tmp_macs=[]
         self.layer_counter=0
-        
+
+class Bush(object):
+
+    def __init__(self):
+        self.fs=[]
+    def __call__(self, packet, x, pnum):
+        for f in self.fs:
+            f(packet, x, pnum)        
 
 def ip_scrape(pcap, outfile):
     pcap=str(pcap)
     ipd = IPDetector()
+    mpd = MacAssociations()
+    _George = Bush()
+    _George.fs += [ipd, mpd]
 
     packets = scapy.PcapReader(pcap)
 
     packet = packets.read_packet() # read next packet
     pnum=0
     while (packet): # empty packet == None
-        crawl(packet, ipd, pnum=pnum)
+        crawl(packet, _George, pnum=pnum)
         packet = packets.read_packet() # read next packet
         ipd.next()
         pnum+=1
     packets.close()
-
-    ipd.ips = ipd.ip_protocol_map.keys()
+    # print(mpd.mac_ip_map)
+    print(mpd.mac_ip_map.get('ff:ff:ff:ff:ff:ff'))
+    ipd.ips = list(ipd.ip_protocol_map.keys())
     output = {
-        'ip' : list(set(ipd.ips))
-        , 'ip.searched_protocols' : { key: list(val) for key,val in ipd.ip_protocol_map.items() }
-        , 'ip.occurrences' : ipd.ip_pktnum_map
+        'ip.groups' : {
+            'source' : []
+            ,'intermediate' : ipd.ips
+            , 'destination' : []
+        }
+        , 'ip.searched_protocols' : [ {'ip':key, 'protocols':list(val)} for key,val in ipd.ip_protocol_map.items() ]
+        , 'ip.occurrences' : [val for key, val in  ipd.ip_pktnum_map.items() if (lambda x,y : x.update(ip=y))(val, key) is None ]
+        , 'mac.associations' : [{'mac' : key, 'ips' : list(val)} for key, val in mpd.mac_ip_map.items()]
         , 'mac.orphaned' : list(set(ipd.orphaned_mac)) 
     }
 

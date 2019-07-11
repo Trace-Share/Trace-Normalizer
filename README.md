@@ -4,12 +4,14 @@ Toolset for normalization of network traffic traces.
 
 ### Table of Contents
 
-* [Description](#description)
-* [Requirements](#requirements)
-* [Usage](#usage)
-  + [Crawler](#crawler)
-  + [Normalizer](#normalizer)
-* [Contribution](#contribution)
+- [Trace-Share: Trace-Normalizer](#Trace-Share-Trace-Normalizer)
+    - [Table of Contents](#Table-of-Contents)
+  - [Description](#Description)
+  - [Requirements](#Requirements)
+  - [Usage](#Usage)
+    - [Crawler](#Crawler)
+    - [Normalizer](#Normalizer)
+  - [Contribution](#Contribution)
 
 
 ## Description
@@ -56,14 +58,25 @@ $ ./crawler.py -p capture.pcap -o output.yml
 
 Script for normalization of a given trace file according to the configuration with addresses characterization. The script produces normalized file and labels in YAML format.
 
-Normalizer requires a simple configuration file providing a categorization of IPv4 and IPv6 addresses. Use Crawler to get info about all addresses in the given trace. Based on input trace analysis, the input YAML configuration may look as follows:
+Normalizer requires a simple configuration file providing a categorization of IPv4 and IPv6 addresses. Any additional unknown keys will be ignored. Use Crawler to get info about all addresses in the given trace. Based on input trace analysis, the input YAML configuration may look as follows:
 ```yaml
-source:
-  - 10.0.0.2
-intermediate:
-destination:
-  - 10.0.0.3
-  - 10.0.0.6
+ip.groups:
+  source:
+    - 10.0.0.2
+  intermediate:
+  destination:
+    - 10.0.0.3
+    - 10.0.0.6
+mac.associations:
+  - ips:
+    - 10.0.0.2
+    mac: D4:63:1F:A0:1A:08
+  - ips:
+    - 10.0.0.3
+    mac: 6F:B0:02:44:2C:BA
+  - ips:
+    - 10.0.0.6
+    mac: AF:E0:74:D4:AC:5B
 ```
 
 Use the following command to start normalization of given trace abased on the given configuration:

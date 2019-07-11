@@ -209,36 +209,61 @@ class IPv4Space(object):
             raise ValueError('IP range exceeded')
         return r 
                    
-# class MacSpace(object):
-#     def __init__(self, block, _from, _to, preserve_prefix=True):
-#         self.prefix=preserve_prefix
-#         self.to = _to
+class MacSpace(object):
+    def __init__(self, _from, _to, preserve_prefix=True):
+        self.prefix=preserve_prefix
+        self.to = _to
 
-#         if self.prefix:
-#             self.rng = [_from, 0 ,0]
-#         else:
-#             self.rng = [_from, 0, 0, 0, 0, 0]
+        if self.prefix:
+            self.rng = [_from, 0 ,0]
+        else:
+            self.rng = [_from, 0, 0, 0, 0, 0]
 
-#     def get_next(self, addr):
-#         if self.prefix:
-#             r = addr[0:4] + self.rng
-#         else:
-#             r = self.rng
-#         r = [str(i) for i in r].join('.')
-#         c = 1
-#         adr_len = 6
-#         if self.prefix:
-#             adr_len = 3
-#         for i in range(adr_len-1, 0,-1):
-#             self.rng[i], c = _carry(self.rng[i], c, 256)
-#         if self.rng[1] > self.to:
-#             raise ValueError('MAC range exceeded')
-#         return r 
+    def get_next(self, addr):
+        if self.prefix:
+            r = [int(i,16) for i in addr.split(':')[0:3]] + self.rng
+        else:
+            r = self.rng
+        r = ':'.join([to_hex(i).replace('0x', '') for i in r])
+        c = 1
+        adr_len = 6
+        if self.prefix:
+            adr_len = 3
+        for i in range(adr_len-1, 0,-1):
+            self.rng[i], c = _carry(self.rng[i], c, 256)
+        if self.rng[1] > self.to:
+            raise ValueError('MAC range exceeded')
+        return r 
 
 
 def _carry(a, b, m):
     a += b
     return a%m, a==m
+
+def build_mac_categories(macs, ips):
+    _ip_map = {}
+    for key, val in ips.items():
+        for ip in val:
+            _ip_map[ip] = key
+    _cfg = {
+        'source' : []
+        , 'intermediate' : []
+        , 'destination' : []
+    }
+    intermediate_set= set('intermediate')
+    for asssociation in macs:
+        _a = set()
+        for i in asssociation['ips']:
+            set.add(_ip_map[i])
+        if len(_a) != 1:
+            ## is it illegal for both to be in?
+            ## For now, drop intermediate
+            if 'source' in _a and 'destination' in _a:
+                raise ValueError('{} belogs to both source and destination!'.format(asssociation['mac']))
+            _a = _a.difference(intermediate_set)
+        _cfg[_a.pop()].append(asssociation['mac'])
+    return _cfg
+            
 
 def generate_config(cfg_path):
     """
@@ -259,9 +284,9 @@ def generate_config(cfg_path):
         , 'intermediate' : IPv4Space(240, 85, 169)
         , 'destination' : IPv4Space(240, 170, 255)
     }
-    # _ip_cfg = _cfg.get('ip')
+    _ip_cfg = _cfg.get('ip.groups')
     _map = []
-    for key, val in _cfg.items():
+    for key, val in _ip_cfg.items():
         ip = ips[key]
         for adr in val:
             _map.append(
@@ -271,27 +296,27 @@ def generate_config(cfg_path):
                         , 'new' : ip.get_next()
                     }
                 }
+            )
+    macs = TMLib.subscribers.normalizers.macs
+    _mac_cfg = build_mac_categories(_cfg.get('mac.associations'), _ip_cfg )
+    _mac_map = []
+    for key, val in _mac_cfg.items():
+        mac = macs[key]
+        for adr in val:
+            _mac_map.append(
+                {
+                    'mac' : {
+                        'old' : adr
+                        , 'new' : macs.get_next()
+                    }
+                }
             ) 
-    # _mac_cfg = _cfg.get('mac')
-    # _mac = []
-    # add mac gen
-    # for key, val in _mac_cfg.items():
-    #     ip = ips[key]
-    #     for adr in val:
-    #         _mac.append(
-    #             {
-    #                 'ip' : {
-    #                     'old' : adr
-    #                     , 'new' : ip.get_next()
-    #                 }
-    #             }
-    #         ) 
     
     rev = {}
     for key, val in _cfg.items():
         for adr in val:
             rev[adr] = key
-    return {'ip.map' : _map, 'ip.norm' : rev}, _cfg
+    return {'ip.map' : _map, 'ip.norm' : rev, 'mac.map' : _mac_map}, _cfg
 
 def label(_cfg, glob_dict, rewrap):
     r = {}
