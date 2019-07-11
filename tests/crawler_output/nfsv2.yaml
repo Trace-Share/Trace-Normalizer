@@ -1,3 +1,20 @@
-ip:
-- 139.25.22.102
-- 139.25.22.2
+ip.groups:
+  destination: []
+  intermediate:
+  - 139.25.22.2
+  source: []
+ip.occurrences:
+- count: 156
+  first_observed: 0
+  ip: 139.25.22.2
+ip.searched_protocols:
+- ip: 139.25.22.2
+  protocols:
+  - <class 'scapy.layers.inet.IP'>
+mac.associations:
+- ips:
+  - 139.25.22.2
+  mac: 00:c0:95:e0:19:be
+- ips:
+  - 139.25.22.102
+  mac: 00:c0:95:f8:4d:d3

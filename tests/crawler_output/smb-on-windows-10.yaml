@@ -1,16 +1,160 @@
-ip:
-- 'fe80::'
-- 224.0.0.22
-- 0.0.0.0
-- 224.0.0.252
-- 192.168.199.132
-- 169.254.195.103
-- '::'
-- 239.255.255.250
-- 'ff02::'
-- 255.255.255.255
-- 192.168.199.254
-- 192.168.199.1
-- 169.254.145.153
-- 192.168.199.255
-- 192.168.199.133
+ip.groups:
+  destination: []
+  intermediate:
+  - 192.168.199.1
+  - 192.168.199.255
+  - 'fe80::'
+  - 'ff02::'
+  - 169.254.145.153
+  - 255.255.255.255
+  - 192.168.199.254
+  - 192.168.199.133
+  - 224.0.0.22
+  - 224.0.0.252
+  - 239.255.255.250
+  - 192.168.199.132
+  source: []
+ip.occurrences:
+- count: 477
+  first_observed: 0
+  ip: 192.168.199.1
+- count: 98
+  first_observed: 0
+  ip: 192.168.199.255
+- count: 218
+  first_observed: 1
+  ip: 'fe80::'
+- count: 183
+  first_observed: 1
+  ip: 'ff02::'
+- count: 5
+  first_observed: 7
+  ip: '::'
+- count: 59
+  first_observed: 13
+  ip: 0.0.0.0
+- count: 5
+  first_observed: 13
+  ip: 169.254.145.153
+- count: 6
+  first_observed: 20
+  ip: 255.255.255.255
+- count: 13
+  first_observed: 21
+  ip: 192.168.199.254
+- count: 564
+  first_observed: 21
+  ip: 192.168.199.133
+- count: 31
+  first_observed: 31
+  ip: 224.0.0.22
+- count: 67
+  first_observed: 41
+  ip: 224.0.0.252
+- count: 24
+  first_observed: 117
+  ip: 239.255.255.250
+- count: 328
+  first_observed: 302
+  ip: 192.168.199.132
+ip.searched_protocols:
+- ip: 192.168.199.1
+  protocols:
+  - <class 'scapy.layers.netbios.NBTDatagram'>
+  - <class 'scapy.layers.l2.ARP'>
+  - <class 'scapy.layers.inet.IP'>
+- ip: 192.168.199.255
+  protocols:
+  - <class 'scapy.layers.inet.IP'>
+- ip: 'fe80::'
+  protocols:
+  - <class 'scapy.layers.inet6.ICMPv6ND_NS'>
+  - <class 'scapy.layers.inet6.ICMPv6ND_NA'>
+  - <class 'scapy.layers.inet6.IPv6'>
+- ip: 'ff02::'
+  protocols:
+  - <class 'scapy.layers.inet6.IPv6'>
+- ip: 169.254.145.153
+  protocols:
+  - <class 'scapy.layers.l2.ARP'>
+- ip: 255.255.255.255
+  protocols:
+  - <class 'scapy.layers.inet.IP'>
+- ip: 192.168.199.254
+  protocols:
+  - <class 'scapy.layers.dhcp.BOOTP'>
+  - <class 'scapy.layers.inet.IP'>
+- ip: 192.168.199.133
+  protocols:
+  - <class 'scapy.layers.dhcp.BOOTP'>
+  - <class 'scapy.layers.inet.IP'>
+  - <class 'scapy.packet.Raw'>
+  - <class 'scapy.layers.l2.ARP'>
+  - <class 'scapy.layers.netbios.NBTDatagram'>
+- ip: 224.0.0.22
+  protocols:
+  - <class 'scapy.layers.inet.IP'>
+- ip: 224.0.0.252
+  protocols:
+  - <class 'scapy.layers.inet.IP'>
+- ip: 239.255.255.250
+  protocols:
+  - <class 'scapy.packet.Raw'>
+  - <class 'scapy.layers.inet.IP'>
+- ip: 192.168.199.132
+  protocols:
+  - <class 'scapy.layers.dhcp.BOOTP'>
+  - <class 'scapy.layers.l2.ARP'>
+  - <class 'scapy.layers.inet.IP'>
+mac.associations:
+- ips:
+  - fe80::78da:c04d:12da:8a08
+  - 192.168.199.1
+  mac: 00:50:56:c0:00:01
+- ips:
+  - ff02::1:2
+  mac: '33:33:00:01:00:02'
+- ips:
+  - 169.254.145.153
+  - 192.168.199.133
+  - '::'
+  - 0.0.0.0
+  - fe80::65b5:3a97:92d1:9199
+  mac: 00:0c:29:61:f5:5f
+- ips:
+  - ff02::1:ffd1:9199
+  mac: 33:33:ff:d1:91:99
+- ips:
+  - ff02::2
+  mac: '33:33:00:00:00:02'
+- ips:
+  - ff02::16
+  mac: '33:33:00:00:00:16'
+- ips:
+  - ff02::1
+  mac: '33:33:00:00:00:01'
+- ips:
+  - 192.168.199.254
+  mac: 00:50:56:f9:22:2b
+- ips:
+  - 224.0.0.22
+  mac: 01:00:5e:00:00:16
+- ips:
+  - ff02::1:3
+  mac: '33:33:00:01:00:03'
+- ips:
+  - 224.0.0.252
+  mac: 01:00:5e:00:00:fc
+- ips:
+  - 239.255.255.250
+  mac: 01:00:5e:7f:ff:fa
+- ips:
+  - 169.254.195.103
+  - '::'
+  - 0.0.0.0
+  - fe80::31cb:26de:c5bb:c367
+  - 192.168.199.132
+  mac: 00:0c:29:03:df:ad
+- ips:
+  - ff02::1:ffbb:c367
+  mac: 33:33:ff:bb:c3:67
