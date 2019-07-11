@@ -11,7 +11,7 @@ import TMLib.SubMng as TMm
 import TMLib.subscribers.normalizers
 
 import sys
-
+import ipaddress
 import argparse
 from pathlib import Path
 
@@ -207,6 +207,17 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
 ## Config gen
 ####
 
+class IPSpace(object):
+    def __init__(self, ipv4, ipv6):
+        self.ipv4 = ipv4
+        self.ipv6 = ipv6
+    def get_next(self, adr):
+        ip = ipaddress.ip_address(adr)
+        if ip.version == 4:
+            return self.ipv4.get_next()
+        return self.ipv6.get_next()
+
+
 class IPv4Space(object):
     """
     Generator of IP space.
@@ -233,32 +244,29 @@ class IPv4Space(object):
         if self.rng[1] > self.to or self.rng[1] < self._from:
             raise ValueError('IP range exceeded')
         return r 
-                   
-class MacSpace(object):
-    def __init__(self, _from, _to, preserve_prefix=True):
-        self.prefix=preserve_prefix
-        self.to = _to
 
-        if self.prefix:
-            self.rng = [_from, 0 ,0]
-        else:
-            self.rng = [_from, 0, 0, 0, 0, 0]
+def to_hex(i,l=4):
+    a = hex(i).replace('0x', '')
+    return '0'*(l-len(a))+a
+## Use https://tools.ietf.org/html/rfc3849  2001:DB8::/32
+class IPv6Space(object):
+    mod = int('ffff', 16)+1
+    def __init__(self, block:str, _from, _to):
+        self.block=block
+        self._from=_from
+        self.to=_to
+        self.rng = [_from] + [0 for _ in range( 7 - len(block.split(':')) )]
+        self.len = len(self.rng)
+    def get_next(self):
+        r = self.block + ":" + ':'.join([to_hex(i) for i in self.rng])
+        r = str(ipaddress.ip_address(r))
 
-    def get_next(self, addr):
-        if self.prefix:
-            r = [int(i,16) for i in addr.split(':')[0:3]] + self.rng
-        else:
-            r = self.rng
-        r = ':'.join([to_hex(i).replace('0x', '') for i in r])
         c = 1
-        adr_len = 6
-        if self.prefix:
-            adr_len = 3
-        for i in range(adr_len-1, 0,-1):
-            self.rng[i], c = _carry(self.rng[i], c, 256)
-        if self.rng[1] > self.to:
+        for i in range(self.len-1, 0,-1):
+            self.rng[i], c = _carry(self.rng[i], c, self.mod)
+        if self.rng[0] > self.to or self._from > self.rng[0]:
             raise ValueError('MAC range exceeded')
-        return r 
+        return r
 
 
 def _carry(a, b, m):
@@ -328,9 +336,9 @@ def generate_config(cfg_path):
     _cfg = parse_config(cfg_path)
     # _blocks = [(255*i)//len(_cfg.keys()) for i in range(1, len(_cfg.keys())+1, 1) ]
     ips = {
-        'source' : IPv4Space(240, 0, 84)
-        , 'intermediate' : IPv4Space(240, 85, 169)
-        , 'destination' : IPv4Space(240, 170, 255)
+        'source' : IPSpace(IPv4Space(240, 0, 84), IPv6Space( '2001:DB8', 0, 21845-1))
+        , 'intermediate' : IPSpace(IPv4Space(240, 85, 169), IPv6Space( '2001:DB8', 21845, 43690-1))
+        , 'destination' : IPSpace(IPv4Space(240, 170, 255), IPv6Space( '2001:DB8', 43690, 65535-1))
     }
     ##
     ## Build up ip.map
@@ -343,7 +351,7 @@ def generate_config(cfg_path):
             if ip_isException(adr):
                 new_adr = adr
             else:
-                new_adr = ip.get_next()
+                new_adr = ip.get_next(adr)
             _map.append(
                 {
                     'ip' : {
