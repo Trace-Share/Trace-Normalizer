@@ -220,7 +220,7 @@ class IPSpace(object):
 
 class IPv4Space(object):
     """
-    Generator of IP space.
+    Generator of IPv4 space.
     """
     def __init__(self, block, _from, _to):
         self._from = _from
@@ -250,7 +250,10 @@ def to_hex(i,l=4):
     return '0'*(l-len(a))+a
 ## Use https://tools.ietf.org/html/rfc3849  2001:DB8::/32
 class IPv6Space(object):
-    mod = int('ffff', 16)+1
+    """
+    Generator of IPv6 space
+    """
+    mod = int('ffff', 16)+1 ## modulo for single ip block
     def __init__(self, block:str, _from, _to):
         self.block=block
         self._from=_from
@@ -258,6 +261,9 @@ class IPv6Space(object):
         self.rng = [_from] + [0 for _ in range( 7 - len(block.split(':')) )]
         self.len = len(self.rng)
     def get_next(self):
+        """
+        Generates new IP Address within space. Raises ValueError if no more IPv6 addresses can be genrated.
+        """
         r = self.block + ":" + ':'.join([to_hex(i) for i in self.rng])
         r = str(ipaddress.ip_address(r))
 
@@ -416,6 +422,22 @@ def label(_cfg, glob_dict, rewrap):
     
 
 def normalize(config_path, pcap, res_path, label_path):
+    """
+    1. Parse config as Yaml (or json)
+
+    2. Generate rewrapper config (FILL functions of transformation functions have predefined keys
+    they look for in configs) from normalizer config.
+    !2. Uses config to precalculate MAC address associations.
+    !2. New IPs and their associations for labels can be collected here.
+
+    3. Build rewrapper and fill up data dicts.
+    !3. Uses functiosn found under TMLib.subscribers.normalizers
+
+    4. Normalize (rewrapp) config.
+    !4. Timestamps, timestamp count, end/start timestamp labels can be collected here
+
+    5. Generate labels
+    """
 
     timestamp_next_pkt = 0
     
