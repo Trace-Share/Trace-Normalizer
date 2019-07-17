@@ -102,6 +102,7 @@ def test_normalizer_main(normlizer_function):
                 #     , res_path=str(Path(outfile.name))
                 #     , label_path=Path(labelfile.name)
                 # )
+                norm.start()
                 norm.join()
                 check(Path(outfile.name), Path(labelfile.name), test['expected_pcap'], test['expected_labels'], test['pcap'].name)
                 outfile.close()
