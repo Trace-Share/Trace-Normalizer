@@ -27,10 +27,7 @@ def parse_config(config_path):
 
     :param config_path: path to config file
     """
-    if config_path.suffix[-1] == 'n': ## naive check for json by last letter
-        param_dict = MUtil.parse_json_args(config_path)
-    else:
-        param_dict = MUtil.parse_yaml_args(config_path)
+    param_dict = MUtil.parse_yaml_args(config_path)
     return param_dict
 
 def build_rewrapper(param_dict):
@@ -494,7 +491,7 @@ if __name__ == '__main__':
     description = "TODO"
 
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('-c', '--configuration', help='Path to a Json or Yaml configuration file.'
+    parser.add_argument('-c', '--configuration', help='Path to a Yaml configuration file.'
     , type=Path, required=True)
     parser.add_argument('-p', '--pcap', help='Path to a PCAP file.', type=Path, required=True)
     parser.add_argument('-o', '--output', help='Path to output PCAP file (creates or overwrites), or output directory (new filename will be "normalized_<pcap name>").'
