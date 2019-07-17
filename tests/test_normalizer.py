@@ -90,7 +90,7 @@ def test_normalizer_main(normlizer_function):
                 outfile.close()
                 labelfile=tempfile.NamedTemporaryFile(dir=tmpdir,delete=False)
                 labelfile.close()
-                norm = Process(normlizer_function, kwargs={
+                norm = Process(target=normlizer_function, kwargs={
                     'config_path':test['config']
                     , 'pcap':str(test['pcap'])
                     , 'res_path':str(Path(outfile.name))
