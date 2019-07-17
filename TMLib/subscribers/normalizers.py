@@ -70,9 +70,9 @@ def _carry(a, b, m):
 
 _blocks = [(255*i)//3 for i in range(1, 4, 1) ]
 macs = {
-    'source' : MacSpace(0, _blocks[0])
-    , 'intermediate' : MacSpace(_blocks[0], _blocks[1])
-    , 'destination' : MacSpace(_blocks[1], _blocks[2])
+    'source' : MacSpace(0, 84)
+    , 'intermediate' : MacSpace(85, 169)
+    , 'destination' : MacSpace(170, 255)
 }
 
 def is_ignored(addr):

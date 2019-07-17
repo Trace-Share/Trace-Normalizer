@@ -421,7 +421,7 @@ def label(_cfg, glob_dict, rewrap):
 
     
 
-def normalize(config_path, pcap, res_path, label_path):
+def normalize(config_path:Path, pcap:str, res_path:str, label_path:Path):
     """
     1. Parse config as Yaml (or json)
 

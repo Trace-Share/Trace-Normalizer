@@ -1,0 +1,7 @@
+ip.groups:
+  destination: []
+  intermediate: []
+  source: []
+ip.occurrences: []
+ip.searched_protocols: []
+mac.associations: []

@@ -1,0 +1,32 @@
+ip.groups:
+  destination: [192.168.0.2]
+  intermediate:
+  - 204.71.200.74
+  source: [192.168.0.1]
+ip.occurrences:
+- count: 272
+  first_observed: 0
+  ip: 192.168.0.2
+- count: 272
+  first_observed: 0
+  ip: 192.168.0.1
+- count: 24
+  first_observed: 219
+  ip: 204.71.200.74
+ip.searched_protocols:
+- ip: 192.168.0.2
+  protocols:
+  - <class 'scapy.layers.inet.IP'>
+- ip: 192.168.0.1
+  protocols:
+  - <class 'scapy.layers.inet.IP'>
+- ip: 204.71.200.74
+  protocols:
+  - <class 'scapy.packet.Raw'>
+mac.associations:
+- ips:
+  - 192.168.0.2
+  mac: 00:a0:cc:3b:bf:fa
+- ips:
+  - 192.168.0.1
+  mac: 00:00:c0:9f:a0:97
