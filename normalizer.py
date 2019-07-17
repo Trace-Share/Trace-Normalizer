@@ -14,6 +14,7 @@ import sys
 import ipaddress
 import argparse
 from pathlib import Path
+from warnings import warn
 
 import yaml
 
@@ -314,6 +315,7 @@ def build_mac_categories(macs, ips):
             ## For now, drop intermediate
             if 'source' in _a and 'destination' in _a:
                 raise ValueError('{} belogs to both source and destination!'.format(asssociation['mac']))
+            warn("Multiple possible categories detected {} for {}".format(_a, asssociation['mac']))
             _a = _a.difference(intermediate_set)
         _cfg[_a.pop()].append(asssociation['mac'])
     return _cfg

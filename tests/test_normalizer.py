@@ -3,6 +3,7 @@ from pathlib import Path
 from hashlib import sha256
 import yaml
 
+from multiprocessing import Process
 
 import scapy.all as scapy
 
@@ -89,12 +90,19 @@ def test_normalizer_main(normlizer_function):
                 outfile.close()
                 labelfile=tempfile.NamedTemporaryFile(dir=tmpdir,delete=False)
                 labelfile.close()
-                normlizer_function(
-                    config_path=test['config']
-                    , pcap=str(test['pcap'])
-                    , res_path=str(Path(outfile.name))
-                    , label_path=Path(labelfile.name)
-                )
+                norm = Process(normlizer_function, kwargs={
+                    'config_path':test['config']
+                    , 'pcap':str(test['pcap'])
+                    , 'res_path':str(Path(outfile.name))
+                    , 'label_path':Path(labelfile.name)
+                })
+                # normlizer_function(
+                #     config_path=test['config']
+                #     , pcap=str(test['pcap'])
+                #     , res_path=str(Path(outfile.name))
+                #     , label_path=Path(labelfile.name)
+                # )
+                norm.join()
                 check(Path(outfile.name), Path(labelfile.name), test['expected_pcap'], test['expected_labels'], test['pcap'].name)
                 outfile.close()
                 labelfile.close()
