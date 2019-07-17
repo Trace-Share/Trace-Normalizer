@@ -1,8 +1,7 @@
 ip.groups:
-  destination: [192.168.199.1]
+  destination: [192.168.199.1, fe80::78da:c04d:12da:8a08]
   intermediate:
   - 192.168.199.255
-  - fe80::78da:c04d:12da:8a08
   - ff02::1:2
   - ff02::1:ffd1:9199
   - fe80::65b5:3a97:92d1:9199
