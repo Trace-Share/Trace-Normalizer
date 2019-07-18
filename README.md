@@ -1,15 +1,19 @@
 # Trace-Share: Trace-Normalizer
 
+[![Build Status](https://travis-ci.org/Trace-Share/Trace-Normalizer.svg?branch=master)](https://travis-ci.org/Trace-Share/Trace-Normalizer)
+
 Toolset for normalization of network traffic traces.
 
 ### Table of Contents
 
-- [Description](#Description)
-- [Requirements](#Requirements)
-- [Usage](#Usage)
+- [Trace-Share: Trace-Normalizer](#Trace-Share-Trace-Normalizer)
+    - [Table of Contents](#Table-of-Contents)
+  - [Description](#Description)
+  - [Requirements](#Requirements)
+  - [Usage](#Usage)
     - [Crawler](#Crawler)
     - [Normalizer](#Normalizer)
-- [Contribution](#Contribution)
+  - [Contribution](#Contribution)
 
 
 ## Description
