@@ -59,8 +59,8 @@ def check(pcap, labels, expected_pcap, expected_labels, pcap_name):
                 dt = ff.read(buffer)
         return h.digest()
     
-    compare(pcap, expected_pcap)
-    #assert buffered_hash(pcap) == buffered_hash(expected_pcap), 'PCAP hash doesnt match expected'
+    # compare(pcap, expected_pcap)
+    assert buffered_hash(pcap) == buffered_hash(expected_pcap), 'PCAP hash doesnt match expected'
     
     with labels.open() as ff:
         ns:dict = yaml.load(ff, Loader=yaml.FullLoader)
