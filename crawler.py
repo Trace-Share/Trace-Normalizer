@@ -314,7 +314,7 @@ def ip_scrape(pcap, outfile):
         yaml.dump(output, ff)
 
 if __name__ == '__main__':
-    description = "TODO"
+    description = "Script for extracting IP and MAC address information from input pcap."
 
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('-p', '--pcap', help='Path to input PCAP file.'

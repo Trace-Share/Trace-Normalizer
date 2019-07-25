@@ -492,7 +492,7 @@ if __name__ == '__main__':
     # print(generate_config(r'D:\Untitled-1.yaml'))
     # normalize(config_path = sys.argv[1], pcap=sys.argv[2], res_path=sys.argv[3])
 
-    description = "TODO"
+    description = "Script for PCAP normalization. Changes and labels IP and MAC addresses based on config into source, intermediate, and destination categories. Shifts timestamps to begin at 0 epoch."
 
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('-c', '--configuration', help='Path to a Yaml configuration file.'
