@@ -313,6 +313,7 @@ def ip_scrape(pcap, outfile):
     with outfile.open('w') as ff:
         yaml.dump(output, ff)
 
+
 if __name__ == '__main__':
     description = "Script for extracting IP and MAC address information from input pcap."
 

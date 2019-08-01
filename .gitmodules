@@ -1,0 +1,3 @@
+[submodule "submodules/Trace-Manipulation"]
+	path = submodules/Trace-Manipulation
+	url = https://github.com/Trace-Share/Trace-Manipulation
