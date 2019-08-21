@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path( Path(__file__).parent / Path('submodules/Trace-Manipulation') ).resolve()) )
+
 import scapy.all as scapy
 
 import TMLib.ReWrapper as ReWrapper
@@ -12,10 +16,8 @@ import TMLib.SubMng as TMm
 
 import TMLib.subscribers.normalizers
 
-import sys
 import ipaddress
 import argparse
-from pathlib import Path
 from warnings import warn
 
 import yaml
