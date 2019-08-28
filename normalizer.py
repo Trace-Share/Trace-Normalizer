@@ -122,7 +122,7 @@ def validate_and_fill_dict(param_dict, rewrap, fill, validate):
     for f in fill:
         f(data, param_dict)
 
-def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
+def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt, timestamp):
     """
     Parsing and rewrapping (and writing) of attack pcap.
 
@@ -148,7 +148,10 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
         res_packets = []
 
         ## timestamp shift based on first packet and input param
-        rewrap.set_timestamp_shift(timestamp_next_pkt - packets[0].time)
+        if timestamp is None:
+            rewrap.set_timestamp_shift(timestamp_next_pkt - packets[0].time)
+        else:
+            rewrap.set_timestamp_shift(timestamp_next_pkt - timestamp)
 
         ## rewrapp packets
         for packet in packets:
@@ -183,7 +186,10 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt):
             tmp_l[0] = packet # store current packet for writing 
             try:
                 if pkt_num == 0: # first packet
-                    rewrap.set_timestamp_shift(timestamp_next_pkt - packet.time)
+                    if timestamp is None:
+                        rewrap.set_timestamp_shift(timestamp_next_pkt - packet.time)
+                    else:
+                        rewrap.set_timestamp_shift(timestamp_next_pkt - timestamp)
                     rewrap.digest(packet, recursive=True)
                     ## Create new pcap
                     scapy.wrpcap(res_path, packet)
@@ -425,7 +431,7 @@ def label(_cfg, glob_dict, rewrap):
 
     
 
-def normalize(config_path:Path, pcap:str, res_path:str, label_path:Path):
+def normalize(config_path:Path, pcap:str, res_path:str, label_path:Path, timestamp:float):
     """
     1. Parse config as Yaml (or json)
 
@@ -479,7 +485,7 @@ def normalize(config_path:Path, pcap:str, res_path:str, label_path:Path):
     ### Reading & rewrapping 
     ###
 
-    rw = rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt)  
+    rw = rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt, timestamp)  
 
     ###
     ### Generating labels
@@ -505,6 +511,8 @@ if __name__ == '__main__':
     , type=Path, required=False, default=Path('.'))
     parser.add_argument('-l', '--label_output', help='Path to output labels (creates or overwrites).',
     type=Path, required=False, default=None)
+    parser.add_argument('-t', '--timestamp', help='First timestamp in packet (will be shifted to zero). First packet timestamp used as default',
+    type=float, required=False, default=None)
 
     args = parser.parse_args()
 
@@ -514,6 +522,6 @@ if __name__ == '__main__':
     if args.label_output is None:
         args.label_output = args.output.parent / Path(args.output.stem + '.yaml')
 
-    normalize(args.configuration, str(args.pcap), str(args.output), args.label_output)
+    normalize(args.configuration, str(args.pcap), str(args.output), args.label_output, args.timestamp)
 
 
