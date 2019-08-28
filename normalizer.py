@@ -83,6 +83,7 @@ def enqueue_functions(param_dict, rewrap):
     , 'icmp_ip_dst_change'
     #TCP
     , 'tcp_auto_checksum'
+    , 'tcp_timestamp_change'
     # DNS
     , 'dns_change_ips'
     # HTTP
