@@ -68,8 +68,10 @@ def enqueue_functions(param_dict, rewrap):
     TMm.change_timestamp_function(rewrap, 'timestamp_shift')
 
     functions = [
+    # CookedLinux
+    'cookedlinux_src_change'
     # Ether
-    'mac_change_default'
+    , 'mac_change_default'
     # ARP
     , 'arp_change_default'
     # IPv4 & IPv6
