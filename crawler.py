@@ -200,6 +200,8 @@ class TCPTimestampMapper(object):
         for o in options:
             if o[0].lower() == 'timestamp':
                 opt_ts = o[1]
+        if opt_ts is None:
+            return
         
         self.get_add(ip_src, opt_ts[0])
         self.get_add(ip_dst, opt_ts[1])
