@@ -84,6 +84,12 @@ def ip_in_bytes(x):
 
 mac_regex = re.compile(r'')
 
+
+def to_hex(i,l=4):
+    a = hex(i).replace('0x', '')
+    return '0'*(l-len(a))+a
+
+
 class MacAssociations:
     """
     Class that searches for mac-ip associations.
@@ -112,7 +118,7 @@ class MacAssociations:
         """
         if isinstance(packet, scapy.CookedLinux):
             _mac = packet.getfieldval('src')
-            self.local['src'] = _mac
+            self.local['src'] = ':'.join([to_hex(i,l=2) for i in _mac[:-2]])
             entry:set = self.mac_ip_map.get(_mac)
             if entry is None:
                 entry = set()
