@@ -205,7 +205,7 @@ class TCPTimestampMapper(object):
         self.get_add(ip_dst, opt_ts[1])
     
     def get_add(self, key, val):
-        if key != 0:
+        if val != 0:
             r = self.min_map.get(key, val)
             self.min_map[key] = min(r, val)
 
