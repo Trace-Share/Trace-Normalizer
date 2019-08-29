@@ -118,7 +118,8 @@ class MacAssociations:
         """
         if isinstance(packet, scapy.CookedLinux):
             _mac = packet.getfieldval('src')
-            self.local['src'] = ':'.join([to_hex(i,l=2) for i in _mac[:-2]])
+            _mac = ':'.join([to_hex(i,l=2) for i in _mac[:-2]])
+            self.local['src'] = _mac
             entry:set = self.mac_ip_map.get(_mac)
             if entry is None:
                 entry = set()
@@ -153,7 +154,7 @@ class MacAssociations:
             if _ip is not None and _mac is not None:
                 entry:set = self.mac_ip_map.get(_mac)
                 entry.add(_ip)
-
+        
                     
     def ip_in_arp(self, packet):
         """
