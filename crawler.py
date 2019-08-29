@@ -178,7 +178,7 @@ class TCPTimestampMapper(object):
         self.min_map = {}
     
     def __call__(self, packet, pnum):
-        if isinstance(packet, scapy.IP) or isinstance(packet, scapy.IPv6):
+        if 'IP' in packet or 'IPv6' in packet:
             self.tcp_first_timestamp_mapper(packet)
 
     def tcp_first_timestamp_mapper(self, packet):
@@ -205,7 +205,7 @@ class TCPTimestampMapper(object):
         self.get_add(ip_dst, opt_ts[1])
     
     def get_add(self, key, val):
-        r = self.min_map.get(key, 0)
+        r = self.min_map.get(key, val)
         self.min_map[key] = min(r, val)
 
 
