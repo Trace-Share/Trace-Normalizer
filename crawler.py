@@ -172,6 +172,43 @@ class MacAssociations:
         """
         self.local.clear()
 
+class TCPTimestampMapper(object):
+
+    def __init__(self):
+        self.min_map = {}
+    
+    def __call__(self, packet, pnum):
+        if isinstance(packet, scapy.IP) or isinstance(packet, scapy.IPv6):
+            self.tcp_first_timestamp_mapper(packet)
+
+    def tcp_first_timestamp_mapper(self, packet):
+        if 'TCP' not in packet:
+            return
+        
+        if 'IP' in packet:
+            ipp = packet['IP']
+        else:
+            ipp = packet['IPv6']
+
+        ip_src = ipp.getfieldval('src')
+        ip_dst = ipp.getfieldval('dst')
+
+        packet = packet['TCP']
+
+        options = packet.getfieldval('options')
+        opt_ts=None
+        for o in options:
+            if o[0].lower() == 'timestamp':
+                opt_ts = o[1]
+        
+        self.get_add(ip_src, opt_ts[0])
+        self.get_add(ip_dst, opt_ts[1])
+    
+    def get_add(self, key, val):
+        r = self.min_map.get(key, 0)
+        self.min_map[key] = min(r, val)
+
+
 class IPDetector(object):
     """
     Crawling class for IP address lookup based on regex
@@ -277,12 +314,14 @@ def ip_scrape(pcap, outfile):
     mpd = MacAssociations()
     _George = Bush() 
     _George.fs += [ipd, mpd] ## Crawlers like to hide in bushes
+    _TCPnator = TCPTimestampMapper()
 
     packets = scapy.PcapReader(pcap)
 
     packet = packets.read_packet() # read next packet
     pnum=0
     while (packet): # empty packet == None
+        _TCPnator(packet,pnum)
         crawl(packet, _George, pnum=pnum) ## Crawl
         packet = packets.read_packet() # read next packet
         _George.next() ## cleanup
@@ -303,6 +342,7 @@ def ip_scrape(pcap, outfile):
             ,'intermediate' : ipd.ips
             , 'destination' : []
         }
+        , 'tcp.timestamp.min' : _TCPnator.min_map
         , 'ip.searched_protocols' : [ {'ip':key, 'protocols':list(val)} for key,val in ipd.ip_protocol_map.items() ]
         #### Black magic to move key from {key:value} into into value
         , 'ip.occurrences' : [val for key, val in  ipd.ip_pktnum_map.items() if (lambda x,y : x.update(ip=y))(val, key) is None ]
