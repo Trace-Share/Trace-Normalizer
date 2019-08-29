@@ -343,7 +343,7 @@ def ip_scrape(pcap, outfile):
             ,'intermediate' : ipd.ips
             , 'destination' : []
         }
-        , 'tcp.timestamp.min' : _TCPnator.min_map
+        , 'tcp.timestamp.min' : [{'ip':key, 'min':val} for key,val in _TCPnator.min_map.items()]
         , 'ip.searched_protocols' : [ {'ip':key, 'protocols':list(val)} for key,val in ipd.ip_protocol_map.items() ]
         #### Black magic to move key from {key:value} into into value
         , 'ip.occurrences' : [val for key, val in  ipd.ip_pktnum_map.items() if (lambda x,y : x.update(ip=y))(val, key) is None ]

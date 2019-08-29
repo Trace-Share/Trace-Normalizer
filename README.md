@@ -7,12 +7,14 @@ Toolset for normalization of network traffic traces.
 
 ### Table of Contents
 
-- [Description](#Description)
-- [Requirements](#Requirements)
-- [Usage](#Usage)
-    - [Crawler](#Crawler)
-    - [Normalizer](#Normalizer)
-- [Contribution](#Contribution)
+- [Trace-Share: Trace-Normalizer](#trace-share-trace-normalizer)
+    - [Table of Contents](#table-of-contents)
+  - [Description](#description)
+  - [Requirements](#requirements)
+  - [Usage](#usage)
+    - [Crawler](#crawler)
+    - [Normalizer](#normalizer)
+  - [Contribution](#contribution)
 
 
 ## Description
@@ -78,6 +80,11 @@ mac.associations:
   - ips:
     - 10.0.0.6
     mac: AF:E0:74:D4:AC:5B
+tpc.timestamp.min:
+  - ip: 10.0.0.2
+    min: 4323
+  - ip: 10.0.0.3
+    min: 8793323
 ```
 
 Use the following command to start normalization of given trace abased on the given configuration:
