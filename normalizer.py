@@ -406,8 +406,10 @@ def generate_config(cfg_path):
     tcp_timestamp_shift = [
         {'ip' : entry['ip'], 'shift': 1-entry['min']} for entry in _cfg['tcp.timestamp.min']
     ]
-
-    tcp_timestamp_shift_min = 1 - min([entry['min'] for entry in _cfg['tcp.timestamp.min']])
+    if len(tcp_timestamp_shift) > 0:
+        tcp_timestamp_shift_min = 1 - min([entry['min'] for entry in _cfg['tcp.timestamp.min']])
+    else:
+        tcp_timestamp_shift_min = 0
 
     return {'ip.map' : _map,
     'ip.norm' : rev,
