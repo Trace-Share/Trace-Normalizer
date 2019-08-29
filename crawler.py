@@ -110,6 +110,14 @@ class MacAssociations:
         """
         IP matching for Ether and IPv4/IPv6 protocol
         """
+        if isinstance(packet, scapy.CookedLinux):
+            _mac = packet.getfieldval('src')
+            self.local['src'] = _mac
+            entry:set = self.mac_ip_map.get(_mac)
+            if entry is None:
+                entry = set()
+                self.mac_ip_map[_mac] = entry
+
         if isinstance(packet, scapy.Ether):
             ## If Ether packet, Record the mac address
             _mac = packet.getfieldval('src')
