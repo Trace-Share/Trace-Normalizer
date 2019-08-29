@@ -86,6 +86,7 @@ tpc.timestamp.min:
   - ip: 10.0.0.3
     min: 8793323
 ```
+*TCP Timestamps are shifted to 1, the 0 values are retained.*
 
 Use the following command to start normalization of given trace abased on the given configuration:
 ```bash
