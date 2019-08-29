@@ -402,7 +402,19 @@ def generate_config(cfg_path):
     for key, val in _ip_cfg.items():
         for adr in val:
             rev[adr] = key
-    return {'ip.map' : _map, 'ip.norm' : rev, 'mac.map' : _mac_map}, _cfg
+    
+    tcp_timestamp_shift = [
+        {'ip' : entry['ip'], 'shift': 0-entry['min']} for entry in _cfg['tcp.timestamp.min']
+    ]
+
+    tcp_timestamp_shift_min = 0 - min([entry['min'] for entry in _cfg['tcp.timestamp.min']])
+
+    return {'ip.map' : _map,
+    'ip.norm' : rev,
+    'mac.map' : _mac_map,
+    'tcp.timestamp.shift' : tcp_timestamp_shift,
+    'tcp.timestamp.shift.default' : tcp_timestamp_shift_min
+    }, _cfg
 
 def label(_cfg, glob_dict, rewrap):
     """
