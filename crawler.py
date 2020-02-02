@@ -336,12 +336,12 @@ def ip_scrape(pcap, outfile):
 
     packets = scapy.PcapReader(pcap)
 
-    packet = packets.read_packet() # read next packet
+    # packet = packets.read_packet() # read next packet
     pnum=0
-    while (packet): # empty packet == None
+    for packet in packets: # empty packet == None
         _TCPnator(packet,pnum)
         crawl(packet, _George, pnum=pnum) ## Crawl
-        packet = packets.read_packet() # read next packet
+        # packet = packets.read_packet() # read next packet
         _George.next() ## cleanup
         pnum+=1
     packets.close()

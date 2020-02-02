@@ -180,11 +180,11 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt, timestamp
 
         pkt_num = 0
 
-        packet = packets.read_packet() # read next packet
+        # packet = packets.read_packet() # read next packet
 
         pktdump = None
         pkt_ts = []
-        while (packet): # empty packet == None
+        for packet in packets: # empty packet == None
             tmp_l[0] = packet # store current packet for writing 
             try:
                 if pkt_num == 0: # first packet
@@ -205,7 +205,7 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt, timestamp
             pkt_num += 1
             pkt_end = packet.time
             pkt_ts.append(pkt_end)
-            packet = packets.read_packet() # read next packet
+            # packet = packets.read_packet() # read next packet
     
     return {
         'packets.count' : pkt_num
