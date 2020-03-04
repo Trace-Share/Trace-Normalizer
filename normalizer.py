@@ -526,7 +526,7 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output', help='Path to output PCAP file (creates or overwrites), or output directory (new filename will be "normalized_<pcap name>").'
     , type=Path, required=False, default=Path('.'))
     parser.add_argument('-l', '--label_output', help='Path to output labels (creates or overwrites).',
-    type=Path, required=False, default=None)
+    type=Path, required=False, default=Path('.'))
     parser.add_argument('-t', '--timestamp', help='First timestamp in packet (will be shifted to zero). First packet timestamp used as default',
     type=float, required=False, default=None)
 
@@ -535,7 +535,7 @@ if __name__ == '__main__':
     if args.output.is_dir():
         args.output = args.output / Path('normalized_{}'.format(args.pcap.name))
 
-    if args.label_output is None:
+    if args.label_output.is_dir():
         args.label_output = args.output.parent / Path(args.output.stem + '.yaml')
 
     normalize(args.configuration, str(args.pcap), str(args.output), args.label_output, args.timestamp)
