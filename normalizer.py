@@ -140,6 +140,9 @@ def rewrapping(pcap, res_path, param_dict, rewrap, timestamp_next_pkt, timestamp
     else: ## default
         readwrite = 'sequence'
 
+    ## Create empty starting file
+    scapy.wrpcap(res_path, [])
+
     ## read & write all at once
     pkt_num=0
     pkt_end=0
