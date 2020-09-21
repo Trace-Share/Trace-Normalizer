@@ -2,7 +2,7 @@
 
 Toolset for normalization of network traffic traces.
 
-[![Build Status](https://travis-ci.org/Trace-Share/Trace-Normalizer.svg?branch=master)](https://travis-ci.org/Trace-Share/Trace-Normalizer)
+[![Build Status](https://travis-ci.com/Trace-Share/Trace-Normalizer.svg?branch=master)](https://travis-ci.com/Trace-Share/Trace-Normalizer)
 
 
 ### Table of Contents
