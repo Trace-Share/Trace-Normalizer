@@ -1,2 +1,2 @@
 scapy==2.4.2
-pyyaml==5.3
+pyyaml==5.4
